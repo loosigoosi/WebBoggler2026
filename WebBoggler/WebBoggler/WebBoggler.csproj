@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DefineSilverlight>true</DefineSilverlight>
+    <!-- Configure Visual Studio to use local IIS for debugging by default -->
+    <UseIIS>true</UseIIS>
+    <IISUrl>http://localhost:8733/gameserver</IISUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenSilver" Version="3.3.3" />
+    <PackageReference Include="OpenSilver.Themes.Modern" Version="3.3.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Page Include="BoardGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HourglassControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SoundFX.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs" />
+    <Compile Include="Board.cs" />
+    <Compile Include="BoardGrid.xaml.cs" />
+    <Compile Include="Connected Services\WebBogglerServer\Reference.cs" />
+    <Compile Include="Connected Services\WebBogglerSockets\Reference.cs" />
+    <Compile Include="Desk.cs" />
+    <Compile Include="Dice.cs" />
+    <Compile Include="Dices.cs" />
+    <Compile Include="Hourglass.cs" />
+    <Compile Include="HourglassControl.xaml.cs" />
+    <Compile Include="MainPage.xaml.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Players.cs" />
+    <Compile Include="ServiceConnector.cs" />
+    <Compile Include="ServiceTypesIntegrator.cs" />
+    <Compile Include="SoundFX.xaml.cs" />
+    <Compile Include="WebSocketShim.cs" />
+    <Compile Include="Word.cs" />
+    <Compile Include="WordBase.cs" />
+    <Compile Include="WordList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.10.*" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.10.*" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.*" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.10.*" />
+    <PackageReference Include="System.ServiceModel.Federation" Version="4.10.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Connected Services\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Board.png" />
+    <Content Include="Assets\Dice.png" />
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+</Project>

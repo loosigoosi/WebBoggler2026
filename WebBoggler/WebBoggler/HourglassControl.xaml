@@ -1,0 +1,24 @@
+﻿<UserControl
+    x:Class="WebBoggler.HourglassControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WebBoggler" Height="400">
+    
+    <Grid Width="70" Height="400">
+        <StackPanel >
+            <Border Width="20" Height="330" BorderThickness="0" VerticalAlignment=" Top" Margin="5,10,5,0" Background="#FF505050">
+                <Rectangle x:Name="rectHourglass" Width="13" Height="326" RenderTransformOrigin="0.5,0.5" Margin=" 2,1,2,1" Fill="#FFEAAA00" VerticalAlignment="Bottom"/>
+            </Border>
+            <TextBlock x:Name="textTime" Text="0:00" Width="40" Height="30" Foreground="#FFEAAA00" FontSize="18" TextAlignment="Center" Padding="0,7,0,0" FontWeight="Bold"/>
+        </StackPanel>
+        <Rectangle x:Name="rectCover" Margin="0,-8,0,0" Height ="380" Width="60" VerticalAlignment="Top" Opacity="0.9" Visibility="Visible"  StrokeEndLineCap="Round" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeThickness="10" RenderTransformOrigin="0.5,0.5" Stroke="#FF150F03">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
+                    <GradientStop Color="#F00A0800" Offset="1"/>
+                    <GradientStop Color="#F0191500"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+    </Grid>
+</UserControl>

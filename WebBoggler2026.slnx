@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="WebBoggler/WebBoggler.Browser/WebBoggler.Browser.csproj" />
+  <Project Path="WebBoggler/WebBoggler.MauiHybrid/WebBoggler.MauiHybrid.csproj" />
+  <Project Path="WebBoggler/WebBoggler.Photino/WebBoggler.Photino.csproj" />
+  <Project Path="WebBoggler/WebBoggler.Simulator/WebBoggler.Simulator.csproj" />
+  <Project Path="WebBoggler/WebBoggler/WebBoggler.csproj" />
+  <Project Path="WebBoggler/WebBogglerCommonTypes/WebBogglerCommonTypes.csproj" />
+  <Project Path="WebBoggler/WebBogglerService/WebBogglerService.vbproj" Id="66e0c125-8784-4136-9e01-7d45f193934f" />
+</Solution>

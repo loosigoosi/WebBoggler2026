@@ -1,0 +1,17 @@
+﻿<UserControl
+    x:Class="WebBoggler.SoundFX"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WebBoggler">
+    
+    <Grid>
+        <MediaElement x:Name="wavButtonTick" Source="ms-appx:/Assets/SoundFX/button-tick.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavErase" Source="ms-appx:/Assets/SoundFX/laser.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavStartChime" Source="ms-appx:/Assets/SoundFX/1-tone-chime.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavEndChime" Source="ms-appx:/Assets/SoundFX/2-tone-chime.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavFail" Source="ms-appx:/Assets/SoundFX/fail-short.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavShake" Source="ms-appx:/Assets/SoundFX/shaking-pillbottle.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavAddWord" Source="ms-appx:/Assets/SoundFX/add-word.mp3" AutoPlay="False"/>
+    </Grid>
+    
+</UserControl>
