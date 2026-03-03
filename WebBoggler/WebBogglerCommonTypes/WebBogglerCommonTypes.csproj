@@ -20,4 +20,8 @@
     <PackageReference Include="OpenSilver" Version="3.3.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <UpToDateCheckInput Remove="libs\**" />
+  </ItemGroup>
+
 </Project>
