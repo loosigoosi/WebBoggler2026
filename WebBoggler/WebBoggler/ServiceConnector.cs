@@ -19,8 +19,8 @@ namespace WebBoggler
         //private const string WEBSOCKETSERVICE_URL = @"ws://webbogglerdev.xidea.it/gameserver/ServiceWebSocket.svc";
 
         //local
-        private const string WCFSERVICE_URL = @"http://localhost:8734/ServiceWebBoggler.svc";
-        private const string WEBSOCKETSERVICE_URL = @"ws://localhost:8734/ServiceWebSocket.svc";
+        private const string WCFSERVICE_URL = @"http://localhost:8733/gameserver/ServiceWebBoggler.svc";
+        private const string WEBSOCKETSERVICE_URL = @"ws://localhost:8733/gameserver/ServiceWebSocket.svc";
 
         ////localIIS
         //private const string WCFSERVICE_URL = @"http://localhost/ServiceWebBoggler.svc";
