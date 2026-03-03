@@ -15,7 +15,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Board", Namespace="http://tempuri.org/")]
-    public partial class Board : object
+    public partial class Board : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private string LocaleIDField;
@@ -35,7 +35,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.LocaleIDField = value;
+                if ((object.ReferenceEquals(this.LocaleIDField, value) != true))
+                {
+                    this.LocaleIDField = value;
+                    this.RaisePropertyChanged("LocaleID");
+                }
             }
         }
         
@@ -48,7 +52,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.DicesVectorField = value;
+                if ((object.ReferenceEquals(this.DicesVectorField, value) != true))
+                {
+                    this.DicesVectorField = value;
+                    this.RaisePropertyChanged("DicesVector");
+                }
             }
         }
         
@@ -61,7 +69,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.WordCountField = value;
+                if ((this.WordCountField.Equals(value) != true))
+                {
+                    this.WordCountField = value;
+                    this.RaisePropertyChanged("WordCount");
+                }
             }
         }
         
@@ -74,7 +86,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.GameSerialField = value;
+                if ((this.GameSerialField.Equals(value) != true))
+                {
+                    this.GameSerialField = value;
+                    this.RaisePropertyChanged("GameSerial");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -82,7 +109,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Dice", Namespace="http://tempuri.org/")]
-    public partial class Dice : object
+    public partial class Dice : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private int IndexField;
@@ -100,7 +127,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.IndexField = value;
+                if ((this.IndexField.Equals(value) != true))
+                {
+                    this.IndexField = value;
+                    this.RaisePropertyChanged("Index");
+                }
             }
         }
         
@@ -113,7 +144,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RotationField = value;
+                if ((this.RotationField.Equals(value) != true))
+                {
+                    this.RotationField = value;
+                    this.RaisePropertyChanged("Rotation");
+                }
             }
         }
         
@@ -126,7 +161,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.LetterField = value;
+                if ((object.ReferenceEquals(this.LetterField, value) != true))
+                {
+                    this.LetterField = value;
+                    this.RaisePropertyChanged("Letter");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -134,7 +184,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="WordList", Namespace="http://tempuri.org/")]
-    public partial class WordList : object
+    public partial class WordList : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private WebBogglerServer.Word[] ItemsField;
@@ -148,7 +198,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.ItemsField = value;
+                if ((object.ReferenceEquals(this.ItemsField, value) != true))
+                {
+                    this.ItemsField = value;
+                    this.RaisePropertyChanged("Items");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -156,7 +221,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Word", Namespace="http://tempuri.org/")]
-    public partial class Word : object
+    public partial class Word : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private WebBogglerServer.Dice[] DicePathField;
@@ -170,7 +235,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.DicePathField = value;
+                if ((object.ReferenceEquals(this.DicePathField, value) != true))
+                {
+                    this.DicePathField = value;
+                    this.RaisePropertyChanged("DicePath");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -178,7 +258,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Players", Namespace="http://tempuri.org/")]
-    public partial class Players : object
+    public partial class Players : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private WebBogglerServer.Player[] ItemsField;
@@ -192,7 +272,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.ItemsField = value;
+                if ((object.ReferenceEquals(this.ItemsField, value) != true))
+                {
+                    this.ItemsField = value;
+                    this.RaisePropertyChanged("Items");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -200,7 +295,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Player", Namespace="http://tempuri.org/")]
-    public partial class Player : object
+    public partial class Player : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private string IDField;
@@ -238,7 +333,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.IDField = value;
+                if ((object.ReferenceEquals(this.IDField, value) != true))
+                {
+                    this.IDField = value;
+                    this.RaisePropertyChanged("ID");
+                }
             }
         }
         
@@ -251,7 +350,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.NickNameField = value;
+                if ((object.ReferenceEquals(this.NickNameField, value) != true))
+                {
+                    this.NickNameField = value;
+                    this.RaisePropertyChanged("NickName");
+                }
             }
         }
         
@@ -264,7 +367,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RankField = value;
+                if ((this.RankField.Equals(value) != true))
+                {
+                    this.RankField = value;
+                    this.RaisePropertyChanged("Rank");
+                }
             }
         }
         
@@ -277,7 +384,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.ScoreField = value;
+                if ((this.ScoreField.Equals(value) != true))
+                {
+                    this.ScoreField = value;
+                    this.RaisePropertyChanged("Score");
+                }
             }
         }
         
@@ -290,7 +401,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RecordField = value;
+                if ((this.RecordField.Equals(value) != true))
+                {
+                    this.RecordField = value;
+                    this.RaisePropertyChanged("Record");
+                }
             }
         }
         
@@ -303,7 +418,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.TotalRoundPlayedField = value;
+                if ((this.TotalRoundPlayedField.Equals(value) != true))
+                {
+                    this.TotalRoundPlayedField = value;
+                    this.RaisePropertyChanged("TotalRoundPlayed");
+                }
             }
         }
         
@@ -316,7 +435,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.TotalWinningRoundField = value;
+                if ((this.TotalWinningRoundField.Equals(value) != true))
+                {
+                    this.TotalWinningRoundField = value;
+                    this.RaisePropertyChanged("TotalWinningRound");
+                }
             }
         }
         
@@ -329,7 +452,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.WinPercentField = value;
+                if ((this.WinPercentField.Equals(value) != true))
+                {
+                    this.WinPercentField = value;
+                    this.RaisePropertyChanged("WinPercent");
+                }
             }
         }
         
@@ -342,7 +469,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.IsLocalField = value;
+                if ((this.IsLocalField.Equals(value) != true))
+                {
+                    this.IsLocalField = value;
+                    this.RaisePropertyChanged("IsLocal");
+                }
             }
         }
         
@@ -355,7 +486,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.IsGuestField = value;
+                if ((this.IsGuestField.Equals(value) != true))
+                {
+                    this.IsGuestField = value;
+                    this.RaisePropertyChanged("IsGuest");
+                }
             }
         }
         
@@ -368,7 +503,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.WordListField = value;
+                if ((object.ReferenceEquals(this.WordListField, value) != true))
+                {
+                    this.WordListField = value;
+                    this.RaisePropertyChanged("WordList");
+                }
             }
         }
         
@@ -381,7 +520,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.TotalWordsCountField = value;
+                if ((this.TotalWordsCountField.Equals(value) != true))
+                {
+                    this.TotalWordsCountField = value;
+                    this.RaisePropertyChanged("TotalWordsCount");
+                }
             }
         }
         
@@ -394,7 +537,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.IsReadyField = value;
+                if ((this.IsReadyField.Equals(value) != true))
+                {
+                    this.IsReadyField = value;
+                    this.RaisePropertyChanged("IsReady");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -402,7 +560,7 @@ namespace WebBogglerServer
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "8.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="GameInfo", Namespace="http://tempuri.org/")]
-    public partial class GameInfo : object
+    public partial class GameInfo : object, System.ComponentModel.INotifyPropertyChanged
     {
         
         private string ServerTimeUTCField;
@@ -424,7 +582,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.ServerTimeUTCField = value;
+                if ((object.ReferenceEquals(this.ServerTimeUTCField, value) != true))
+                {
+                    this.ServerTimeUTCField = value;
+                    this.RaisePropertyChanged("ServerTimeUTC");
+                }
             }
         }
         
@@ -437,7 +599,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RoundElapsedTimeMSField = value;
+                if ((this.RoundElapsedTimeMSField.Equals(value) != true))
+                {
+                    this.RoundElapsedTimeMSField = value;
+                    this.RaisePropertyChanged("RoundElapsedTimeMS");
+                }
             }
         }
         
@@ -450,7 +616,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RoundDurationMSField = value;
+                if ((this.RoundDurationMSField.Equals(value) != true))
+                {
+                    this.RoundDurationMSField = value;
+                    this.RaisePropertyChanged("RoundDurationMS");
+                }
             }
         }
         
@@ -463,7 +633,11 @@ namespace WebBogglerServer
             }
             set
             {
-                this.DeadTimeAmountMSField = value;
+                if ((this.DeadTimeAmountMSField.Equals(value) != true))
+                {
+                    this.DeadTimeAmountMSField = value;
+                    this.RaisePropertyChanged("DeadTimeAmountMS");
+                }
             }
         }
         
@@ -476,7 +650,22 @@ namespace WebBogglerServer
             }
             set
             {
-                this.RoomStateField = value;
+                if ((object.ReferenceEquals(this.RoomStateField, value) != true))
+                {
+                    this.RoomStateField = value;
+                    this.RaisePropertyChanged("RoomState");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null))
+            {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -486,40 +675,32 @@ namespace WebBogglerServer
     public interface IServiceWebBoggler
     {
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento localeID dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/GetBoard", ReplyAction="http://tempuri.org/IServiceWebBoggler/GetBoardResponse")]
-        WebBogglerServer.GetBoardResponse GetBoard(WebBogglerServer.GetBoardRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.GetBoardResponse> GetBoardAsync(WebBogglerServer.GetBoardRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento word dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/CheckWord", ReplyAction="http://tempuri.org/IServiceWebBoggler/CheckWordResponse")]
-        WebBogglerServer.CheckWordResponse CheckWord(WebBogglerServer.CheckWordRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.CheckWordResponse> CheckWordAsync(WebBogglerServer.CheckWordRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento wordList dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/SendWordList", ReplyAction="http://tempuri.org/IServiceWebBoggler/SendWordListResponse")]
-        WebBogglerServer.SendWordListResponse SendWordList(WebBogglerServer.SendWordListRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.SendWordListResponse> SendWordListAsync(WebBogglerServer.SendWordListRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento clientID dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/Join", ReplyAction="http://tempuri.org/IServiceWebBoggler/JoinResponse")]
-        WebBogglerServer.JoinResponse Join(WebBogglerServer.JoinRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.JoinResponse> JoinAsync(WebBogglerServer.JoinRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento clientID dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/Leave", ReplyAction="http://tempuri.org/IServiceWebBoggler/LeaveResponse")]
-        WebBogglerServer.LeaveResponse Leave(WebBogglerServer.LeaveRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.LeaveResponse> LeaveAsync(WebBogglerServer.LeaveRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento clientID dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/GetPlayers", ReplyAction="http://tempuri.org/IServiceWebBoggler/GetPlayersResponse")]
-        WebBogglerServer.GetPlayersResponse GetPlayers(WebBogglerServer.GetPlayersRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.GetPlayersResponse> GetPlayersAsync(WebBogglerServer.GetPlayersRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento GetSolutionResult dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/GetSolution", ReplyAction="http://tempuri.org/IServiceWebBoggler/GetSolutionResponse")]
-        WebBogglerServer.GetSolutionResponse GetSolution(WebBogglerServer.GetSolutionRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.GetSolutionResponse> GetSolutionAsync(WebBogglerServer.GetSolutionRequest request);
         
-        // CODEGEN: Generazione del contratto di messaggio perché il nome di elemento ObserveResult dello spazio dei nomi http://tempuri.org/ non è contrassegnato come nillable
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/Observe", ReplyAction="http://tempuri.org/IServiceWebBoggler/ObserveResponse")]
-        WebBogglerServer.ObserveResponse Observe(WebBogglerServer.ObserveRequest request);
+        System.Threading.Tasks.Task<WebBogglerServer.ObserveResponse> ObserveAsync(WebBogglerServer.ObserveRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IServiceWebBoggler/IsServerAlive", ReplyAction="http://tempuri.org/IServiceWebBoggler/IsServerAliveResponse")]
-        bool IsServerAlive();
+        System.Threading.Tasks.Task<bool> IsServerAliveAsync();
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -1197,127 +1378,120 @@ namespace WebBogglerServer
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.GetBoardResponse WebBogglerServer.IServiceWebBoggler.GetBoard(WebBogglerServer.GetBoardRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.GetBoardResponse> WebBogglerServer.IServiceWebBoggler.GetBoardAsync(WebBogglerServer.GetBoardRequest request)
         {
-            return base.Channel.GetBoard(request);
+            return base.Channel.GetBoardAsync(request);
         }
         
-        public WebBogglerServer.Board GetBoard(string localeID)
+        public System.Threading.Tasks.Task<WebBogglerServer.GetBoardResponse> GetBoardAsync(string localeID)
         {
             WebBogglerServer.GetBoardRequest inValue = new WebBogglerServer.GetBoardRequest();
             inValue.Body = new WebBogglerServer.GetBoardRequestBody();
             inValue.Body.localeID = localeID;
-            WebBogglerServer.GetBoardResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).GetBoard(inValue);
-            return retVal.Body.GetBoardResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).GetBoardAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.CheckWordResponse WebBogglerServer.IServiceWebBoggler.CheckWord(WebBogglerServer.CheckWordRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.CheckWordResponse> WebBogglerServer.IServiceWebBoggler.CheckWordAsync(WebBogglerServer.CheckWordRequest request)
         {
-            return base.Channel.CheckWord(request);
+            return base.Channel.CheckWordAsync(request);
         }
         
-        public bool CheckWord(string word)
+        public System.Threading.Tasks.Task<WebBogglerServer.CheckWordResponse> CheckWordAsync(string word)
         {
             WebBogglerServer.CheckWordRequest inValue = new WebBogglerServer.CheckWordRequest();
             inValue.Body = new WebBogglerServer.CheckWordRequestBody();
             inValue.Body.word = word;
-            WebBogglerServer.CheckWordResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).CheckWord(inValue);
-            return retVal.Body.CheckWordResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).CheckWordAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.SendWordListResponse WebBogglerServer.IServiceWebBoggler.SendWordList(WebBogglerServer.SendWordListRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.SendWordListResponse> WebBogglerServer.IServiceWebBoggler.SendWordListAsync(WebBogglerServer.SendWordListRequest request)
         {
-            return base.Channel.SendWordList(request);
+            return base.Channel.SendWordListAsync(request);
         }
         
-        public void SendWordList(WebBogglerServer.WordList wordList, string ClientID)
+        public System.Threading.Tasks.Task<WebBogglerServer.SendWordListResponse> SendWordListAsync(WebBogglerServer.WordList wordList, string ClientID)
         {
             WebBogglerServer.SendWordListRequest inValue = new WebBogglerServer.SendWordListRequest();
             inValue.Body = new WebBogglerServer.SendWordListRequestBody();
             inValue.Body.wordList = wordList;
             inValue.Body.ClientID = ClientID;
-            WebBogglerServer.SendWordListResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).SendWordList(inValue);
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).SendWordListAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.JoinResponse WebBogglerServer.IServiceWebBoggler.Join(WebBogglerServer.JoinRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.JoinResponse> WebBogglerServer.IServiceWebBoggler.JoinAsync(WebBogglerServer.JoinRequest request)
         {
-            return base.Channel.Join(request);
+            return base.Channel.JoinAsync(request);
         }
         
-        public bool Join(string clientID, string name)
+        public System.Threading.Tasks.Task<WebBogglerServer.JoinResponse> JoinAsync(string clientID, string name)
         {
             WebBogglerServer.JoinRequest inValue = new WebBogglerServer.JoinRequest();
             inValue.Body = new WebBogglerServer.JoinRequestBody();
             inValue.Body.clientID = clientID;
             inValue.Body.name = name;
-            WebBogglerServer.JoinResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).Join(inValue);
-            return retVal.Body.JoinResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).JoinAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.LeaveResponse WebBogglerServer.IServiceWebBoggler.Leave(WebBogglerServer.LeaveRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.LeaveResponse> WebBogglerServer.IServiceWebBoggler.LeaveAsync(WebBogglerServer.LeaveRequest request)
         {
-            return base.Channel.Leave(request);
+            return base.Channel.LeaveAsync(request);
         }
         
-        public bool Leave(string clientID)
+        public System.Threading.Tasks.Task<WebBogglerServer.LeaveResponse> LeaveAsync(string clientID)
         {
             WebBogglerServer.LeaveRequest inValue = new WebBogglerServer.LeaveRequest();
             inValue.Body = new WebBogglerServer.LeaveRequestBody();
             inValue.Body.clientID = clientID;
-            WebBogglerServer.LeaveResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).Leave(inValue);
-            return retVal.Body.LeaveResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).LeaveAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.GetPlayersResponse WebBogglerServer.IServiceWebBoggler.GetPlayers(WebBogglerServer.GetPlayersRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.GetPlayersResponse> WebBogglerServer.IServiceWebBoggler.GetPlayersAsync(WebBogglerServer.GetPlayersRequest request)
         {
-            return base.Channel.GetPlayers(request);
+            return base.Channel.GetPlayersAsync(request);
         }
         
-        public WebBogglerServer.Players GetPlayers(string clientID)
+        public System.Threading.Tasks.Task<WebBogglerServer.GetPlayersResponse> GetPlayersAsync(string clientID)
         {
             WebBogglerServer.GetPlayersRequest inValue = new WebBogglerServer.GetPlayersRequest();
             inValue.Body = new WebBogglerServer.GetPlayersRequestBody();
             inValue.Body.clientID = clientID;
-            WebBogglerServer.GetPlayersResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).GetPlayers(inValue);
-            return retVal.Body.GetPlayersResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).GetPlayersAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.GetSolutionResponse WebBogglerServer.IServiceWebBoggler.GetSolution(WebBogglerServer.GetSolutionRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.GetSolutionResponse> WebBogglerServer.IServiceWebBoggler.GetSolutionAsync(WebBogglerServer.GetSolutionRequest request)
         {
-            return base.Channel.GetSolution(request);
+            return base.Channel.GetSolutionAsync(request);
         }
         
-        public WebBogglerServer.WordList GetSolution()
+        public System.Threading.Tasks.Task<WebBogglerServer.GetSolutionResponse> GetSolutionAsync()
         {
             WebBogglerServer.GetSolutionRequest inValue = new WebBogglerServer.GetSolutionRequest();
             inValue.Body = new WebBogglerServer.GetSolutionRequestBody();
-            WebBogglerServer.GetSolutionResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).GetSolution(inValue);
-            return retVal.Body.GetSolutionResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).GetSolutionAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        WebBogglerServer.ObserveResponse WebBogglerServer.IServiceWebBoggler.Observe(WebBogglerServer.ObserveRequest request)
+        System.Threading.Tasks.Task<WebBogglerServer.ObserveResponse> WebBogglerServer.IServiceWebBoggler.ObserveAsync(WebBogglerServer.ObserveRequest request)
         {
-            return base.Channel.Observe(request);
+            return base.Channel.ObserveAsync(request);
         }
         
-        public WebBogglerServer.GameInfo Observe()
+        public System.Threading.Tasks.Task<WebBogglerServer.ObserveResponse> ObserveAsync()
         {
             WebBogglerServer.ObserveRequest inValue = new WebBogglerServer.ObserveRequest();
             inValue.Body = new WebBogglerServer.ObserveRequestBody();
-            WebBogglerServer.ObserveResponse retVal = ((WebBogglerServer.IServiceWebBoggler)(this)).Observe(inValue);
-            return retVal.Body.ObserveResult;
+            return ((WebBogglerServer.IServiceWebBoggler)(this)).ObserveAsync(inValue);
         }
         
-        public bool IsServerAlive()
+        public System.Threading.Tasks.Task<bool> IsServerAliveAsync()
         {
-            return base.Channel.IsServerAlive();
+            return base.Channel.IsServerAliveAsync();
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()
@@ -1350,7 +1524,7 @@ namespace WebBogglerServer
         {
             if ((endpointConfiguration == EndpointConfiguration.BasicHttpBinding_IServiceWebBoggler))
             {
-                return new System.ServiceModel.EndpointAddress("http://localhost:54057/ServiceWebBoggler.svc");
+                return new System.ServiceModel.EndpointAddress("http://localhost:5733/ServiceWebBoggler.svc");
             }
             throw new System.InvalidOperationException(string.Format("L\'endpoint denominato \'{0}\' non è stato trovato.", endpointConfiguration));
         }

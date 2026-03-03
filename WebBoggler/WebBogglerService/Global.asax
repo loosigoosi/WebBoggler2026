@@ -26,13 +26,47 @@
     End Sub
 
     Sub Application_BeginRequest(sender As Object, e As EventArgs)
-        HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*")
+        Dim ctx = HttpContext.Current
+        If ctx Is Nothing Then Return
 
-        If HttpContext.Current.Request.HttpMethod = "OPTIONS" Then
-            'These headers are handling the "pre-flight" OPTIONS call sent by the browser
-            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, SOAPAction")
-            HttpContext.Current.Response.AddHeader("Access-Control-Max-Age", "1728000")
-            HttpContext.Current.Response.End()
-        End If
+        ' Log every BeginRequest to temp file for diagnostics
+        Try
+            Dim req = ctx.Request
+            Dim resp = ctx.Response
+            Dim logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_cors_log.txt")
+            Dim origin As String = If(req.Headers("Origin"), "")
+            Dim line As String = String.Format("{0:u} | {1} {2} | Origin:{3} | URL:{4}{5}", DateTime.Now, req.HttpMethod, req.RawUrl, origin, req.Url.ToString(), Environment.NewLine)
+            System.IO.File.AppendAllText(logPath, line)
+
+            ' Existing CORS handling: ensure response contains a single Access-Control-Allow-Origin
+            If Not String.IsNullOrEmpty(origin) Then
+                If Not String.IsNullOrEmpty(resp.Headers("Access-Control-Allow-Origin")) Then
+                    resp.Headers.Remove("Access-Control-Allow-Origin")
+                End If
+                resp.AddHeader("Access-Control-Allow-Origin", origin)
+            End If
+
+            If String.Equals(req.HttpMethod, "OPTIONS", StringComparison.OrdinalIgnoreCase) Then
+                If Not String.IsNullOrEmpty(resp.Headers("Access-Control-Allow-Methods")) Then resp.Headers.Remove("Access-Control-Allow-Methods")
+                resp.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+                If Not String.IsNullOrEmpty(resp.Headers("Access-Control-Allow-Headers")) Then resp.Headers.Remove("Access-Control-Allow-Headers")
+                resp.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, SOAPAction")
+
+                If Not String.IsNullOrEmpty(resp.Headers("Access-Control-Max-Age")) Then resp.Headers.Remove("Access-Control-Max-Age")
+                resp.AddHeader("Access-Control-Max-Age", "1728000")
+
+                resp.StatusCode = 200
+                ' Avoid ThreadAbortException caused by Response.End();
+                ' CompleteRequest signals ASP.NET to skip remaining pipeline and finish the request cleanly.
+                HttpContext.Current.ApplicationInstance.CompleteRequest()
+            End If
+        Catch ex As Exception
+            ' Log exceptions related to BeginRequest diagnostics
+            Try
+                Dim errPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_cors_log_errors.txt")
+                System.IO.File.AppendAllText(errPath, DateTime.Now.ToString("u") & " | BeginRequest error: " & ex.ToString() & Environment.NewLine)
+            Catch
+            End Try
+        End Try
     End Sub</script>

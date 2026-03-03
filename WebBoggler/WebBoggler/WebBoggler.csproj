@@ -7,6 +7,8 @@
     <!-- Configure Visual Studio to use local IIS for debugging by default -->
     <UseIIS>true</UseIIS>
     <IISUrl>http://localhost:8733/gameserver</IISUrl>
+    <Title>WebBoggler</Title>
+    <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="OpenSilver" Version="3.3.3" />
@@ -43,6 +45,11 @@
     <Compile Include="MainPage.xaml.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Players.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ServiceConnector.cs" />
     <Compile Include="ServiceTypesIntegrator.cs" />
     <Compile Include="SoundFX.xaml.cs" />
@@ -64,6 +71,29 @@
   <ItemGroup>
     <Content Include="Assets\Board.png" />
     <Content Include="Assets\Dice.png" />
+    <Content Include="Assets\enFlag.png" />
+    <Content Include="Assets\enFlag_tiny.png" />
+    <Content Include="Assets\favicon.ico" />
+    <Content Include="Assets\itFlag.png" />
+    <Content Include="Assets\itFlag_tiny.png" />
+    <Content Include="SoundFX\1-tone-chime.mp3" />
+    <Content Include="SoundFX\2-tone-chime.mp3" />
+    <Content Include="SoundFX\add-word.mp3" />
+    <Content Include="SoundFX\button-tick.mp3" />
+    <Content Include="SoundFX\fail-short.mp3" />
+    <Content Include="SoundFX\failure.mp3" />
+    <Content Include="SoundFX\harmony.mp3" />
+    <Content Include="SoundFX\laser.mp3" />
+    <Content Include="SoundFX\shaking-pillbottle.mp3" />
+    <Content Include="SoundFX\tail.mp3" />
+    <Content Include="Connected Services\WebBogglerServer\ConnectedService.json" />
+    <Content Include="Connected Services\WebBogglerSockets\ConnectedService.json" />
     <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

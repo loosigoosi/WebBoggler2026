@@ -6,7 +6,7 @@ Imports System.Web.Configuration
 Imports System.Net.WebSockets
 Imports BigBoggler_Common
 
-<CORSSupportBehavior>
+<CORSSupportBehaviorAttribute>
 <ServiceBehavior(InstanceContextMode:=InstanceContextMode.PerSession, ConcurrencyMode:=ConcurrencyMode.Multiple)>
 Public Class ServiceWebBoggler
     Implements IServiceWebBoggler
@@ -23,19 +23,44 @@ Public Class ServiceWebBoggler
     Friend Shared Event RemovedPlayer()
 
     Friend Sub New()
-        ServiceWebSocket.ServiceWebBogglerInstance = Me
-        If Not WebConfigurationManager.AppSettings.AllKeys.Contains("BoardsServedCount") Then
-            ''Scrivo il seriale della board in web.config
-            Dim myConfiguration As Configuration = WebConfigurationManager.OpenWebConfiguration("~")
-            myConfiguration.AppSettings.Settings.Add("BoardsServedCount", "0")
-            myConfiguration.Save()
-            ''
-        End If
+        ' Protect the constructor so any exception gets logged and to avoid writing
+        ' to web.config at runtime (which would trigger appdomain recycles).
+        Try
+            ServiceWebSocket.ServiceWebBogglerInstance = Me
 
-        Dim startingBoardSerial As Integer
+            ' Ensure RoomMaster is created only once (shared) and avoid recreating it on every
+            ' service instance construction. Use a type-level lock for thread-safety.
+            If _RoomMaster Is Nothing Then
+                SyncLock GetType(ServiceWebBoggler)
+                    If _RoomMaster Is Nothing Then
+                        Dim startingBoardSerial As Integer = 0
+                        Try
+                            If WebConfigurationManager.AppSettings.AllKeys.Contains("BoardsServedCount") Then
+                                Integer.TryParse(WebConfigurationManager.AppSettings("BoardsServedCount"), startingBoardSerial)
+                            Else
+                                ' Do not write web.config here. Log the missing key and continue with 0.
+                                Dim logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_service_init_log.txt")
+                                System.IO.File.AppendAllText(logPath, DateTime.Now.ToString("u") & " | BoardsServedCount missing; using 0" & Environment.NewLine)
+                            End If
+                        Catch exRead As Exception
+                            Dim logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_service_init_log.txt")
+                            System.IO.File.AppendAllText(logPath, DateTime.Now.ToString("u") & " | Error reading AppSettings: " & exRead.ToString() & Environment.NewLine)
+                        End Try
 
-        startingBoardSerial = Integer.Parse(WebConfigurationManager.AppSettings("BoardsServedCount"))
-        _RoomMaster = New RoomMaster(startingBoardSerial)
+                        _RoomMaster = New RoomMaster(startingBoardSerial)
+                        Dim logCreate = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_service_init_log.txt")
+                        System.IO.File.AppendAllText(logCreate, DateTime.Now.ToString("u") & " | RoomMaster created with serial " & startingBoardSerial & Environment.NewLine)
+                    End If
+                End SyncLock
+            End If
+        Catch ex As Exception
+            Try
+                Dim errPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wbg_service_init_log.txt")
+                System.IO.File.AppendAllText(errPath, DateTime.Now.ToString("u") & " | ServiceWebBoggler ctor exception: " & ex.ToString() & Environment.NewLine)
+            Catch
+            End Try
+            Throw
+        End Try
     End Sub
     '''Public Class GameInfo
     '''    Public Property RoomState As String

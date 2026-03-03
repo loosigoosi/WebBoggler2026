@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace WebBoggler
 {
@@ -30,6 +31,12 @@ namespace WebBoggler
         {
             this.InitializeComponent();
 
+
+
+        }
+
+        public void PlaySound(Sound sound)
+        {
             _letterTap = wavButtonTick;
             _startGame = wavStartChime;
             _endGame = wavEndChime;
@@ -38,11 +45,6 @@ namespace WebBoggler
             _shakeBoard = wavShake;
             _laser = wavErase;
 
-
-        }
-
-        public void PlaySound(Sound sound)
-        {
             MediaElement mediaToPlay = null;
             switch (sound)
             {
@@ -70,9 +72,11 @@ namespace WebBoggler
             }
 
             if (!Mute)
+                try
             {
-                mediaToPlay.Play();
+                //mediaToPlay.Play();
             }
+                catch { }
         }
     }
 }

@@ -191,16 +191,21 @@ namespace WebBoggler
             finally { }
 		}
 
-        internal void Join(string userName)
+        internal async Task Join(string userName)
         {
             _localPlayer.NickName = userName;
-
-            var result = _serviceClient.Join(_localPlayer.ID, "*" + _localPlayer.NickName +"."+ _localPlayer.ID.Substring(0, 3));
-            if (result)
+            try
             {
-                _gameInfo = _serviceClient.Observe();
+                var joinResp = await _serviceClient.JoinAsync(_localPlayer.ID, "*" + _localPlayer.NickName + "." + _localPlayer.ID.Substring(0, 3));
+                var result = false;
+                try { result = joinResp.Body.JoinResult; } catch { result = false; }
 
-                if (_gameInfo.RoomState == "RunningRound")
+                if (result)
+                {
+                    var obsResp = await _serviceClient.ObserveAsync();
+                    _gameInfo = obsResp.Body.ObserveResult;
+
+                    if (_gameInfo != null && _gameInfo.RoomState == "RunningRound")
                 {
                     _gameControlsPanel.Visibility = Visibility.Visible;
                     _gameStatusPanel.Visibility = Visibility.Collapsed;
@@ -210,30 +215,34 @@ namespace WebBoggler
                     _Hourglass.HideCover();
                     _Hourglass.Reset();
                     _Hourglass.Run();
+                        var startTimeOffset = TimeSpan.FromMilliseconds(_gameInfo.RoundElapsedTimeMS);
+                        _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime() - startTimeOffset;
 
-                    var startTimeOffset = TimeSpan.FromMilliseconds(_gameInfo.RoundElapsedTimeMS);
-                    _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime() - startTimeOffset;
-
-                    _wordFoundCountTextBlock.Visibility = Visibility.Visible;
-                    _wordFoundCountTextBlock.Text = "Parole trovate: 0";
+                        _wordFoundCountTextBlock.Visibility = Visibility.Visible;
+                        _wordFoundCountTextBlock.Text = "Parole trovate: 0";
+                    }
+                    _Mode = DeskMode.Playing;
+                    _loginPanel.Visibility = Visibility.Collapsed;
+                    _wordListControl.SelectionChanged += _wordListControl_SelectionChanged;
+                    _cmdJoin.Content = "Abbandona";
+                    _cmdJoin.Tag = "Leave";
                 }
-                _Mode = DeskMode.Playing;
-                _loginPanel.Visibility = Visibility.Collapsed;
-                _wordListControl.SelectionChanged += _wordListControl_SelectionChanged;
-                _cmdJoin.Content = "Abbandona";
-                _cmdJoin.Tag = "Leave";
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Join error: " + ex.Message);
             }
         }
 
-        internal void Leave()
-		{
-            var result = false;
+        internal async Task LeaveAsync()
+        {
             try
             {
-                result = _serviceClient.Leave(_localPlayer.ID);
-            }
-            finally
-            {
+                var resp = await _serviceClient.LeaveAsync(_localPlayer.ID);
+                var result = false;
+
+                try { result = resp.Body.LeaveResult; } catch { result = false; }
+                
                 if (result)
                 {
                     _wordEntry.Clear();
@@ -242,7 +251,7 @@ namespace WebBoggler
                     _wordFoundCountTextBlock.Visibility = Visibility.Collapsed;
                     _playersWordListPanel.Visibility = Visibility.Collapsed;
                     _localWordListPanel.Visibility = Visibility.Visible;
-                     _boardGrid.ShowCover();
+                    _boardGrid.ShowCover();
                     _Hourglass.ShowCover();
                     _Hourglass.Visibility = Visibility.Visible;
                     _cmdJoin.Content = "Partecipa";
@@ -252,16 +261,34 @@ namespace WebBoggler
                     _loginPanel.Visibility = Visibility.Visible;
                     _wordListControl.SelectionChanged -= _wordListControl_SelectionChanged;
                     _Mode = DeskMode.Observing;
-               }
+                }
             }
-		}
-
-		internal void GetBoardFromServer(string localeID)
-        {
-           var board = new WebBogglerServer.Board();
-           try
+            catch (Exception ex)
             {
-                board = _serviceClient.GetBoard(localeID);
+                System.Windows.MessageBox.Show("Leave error: " + ex.Message);
+            }
+        }
+
+        internal async Task GetBoardFromServerAsync(string localeID)
+        {
+
+
+            //test
+            var commObj = (System.ServiceModel.ICommunicationObject)_serviceClient;
+            if (commObj.State == System.ServiceModel.CommunicationState.Faulted)
+            {
+                System.Windows.MessageBox.Show("Service client is in Faulted state.");
+                // opzionale: ricrea il client: _serviceClient = new ServiceConnector().ConnectService();
+            }
+
+
+
+
+
+            try
+            {
+                var resp = await _serviceClient.GetBoardAsync(localeID);
+                var board = resp.Body.GetBoardResult;
                 _board = (Board)board;
             }
             catch( Exception ex) { System.Windows.MessageBox.Show(ex.Message); }
@@ -276,18 +303,18 @@ namespace WebBoggler
 
         }
 
-        internal bool ValidateWord(string text)
+        internal async Task<bool> ValidateWordAsync(string text)
         {
             try
             {
-                return _serviceClient.CheckWord(text);
+                var resp = await _serviceClient.CheckWordAsync(text);
+                return resp.Body.CheckWordResult;
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Error checking word! \n"+ ex.Message);
                 return false;
             }
-            finally { }
          }
 
         internal void AddEntryToWordList()
@@ -317,9 +344,30 @@ namespace WebBoggler
         {
             _Mode = DeskMode.Observing; 
 
-            GetBoardFromServer("it-IT");
+            GetBoardFromServerAsync("it-IT");
 
-            _gameInfo = _serviceClient.Observe();
+            try
+            {
+                var obsResp = await _serviceClient.ObserveAsync();
+                _gameInfo = obsResp.Body.ObserveResult;
+            }
+            /*catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Observe error: " + ex.Message);
+            }*/
+            catch (System.ServiceModel.FaultException fe)
+            {
+                            System.Windows.MessageBox.Show("FaultException:\n" + fe.ToString());
+                        }
+            catch (System.ServiceModel.CommunicationException ce)
+            {
+                            System.Windows.MessageBox.Show("CommunicationException:\n" + ce.ToString());
+                        }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Observe error:\n" + ex.ToString());
+            }
+
 
             _gameStatusText.Text = "Turno di gioco #" + (_board.GameSerial).ToString().Trim();
 
@@ -344,10 +392,14 @@ namespace WebBoggler
             }
         }
 
-        private void SendWordList()
+        private async Task SendWordListAsync()
         {
             // Rely on the implicit conversion operator between local WordList and proxy WordList
-            _serviceClient.SendWordList(_wordList, _localPlayer.ID);
+            try
+            {
+                await _serviceClient.SendWordListAsync(_wordList, _localPlayer.ID);
+            }
+            catch { }
         }
 
         private async Task<Players> UpdatePlayers()
@@ -355,7 +407,8 @@ namespace WebBoggler
             Players plys;
             try
             {
-                plys = (Players)(_serviceClient.GetPlayers(_localPlayer.ID));
+                var resp = await _serviceClient.GetPlayersAsync(_localPlayer.ID);
+                plys = (Players)(resp.Body.GetPlayersResult);
             }
             catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message);  return null;}
 
@@ -368,7 +421,8 @@ namespace WebBoggler
             WordList sol;
             try
             {
-                sol = (WordList)_serviceClient.GetSolution();
+                var resp = await _serviceClient.GetSolutionAsync();
+                sol = (WordList)resp.Body.GetSolutionResult;
             }
             catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message); return null; }
 
@@ -557,8 +611,10 @@ namespace WebBoggler
 					    }
 
                         _soundFX.PlaySound(Sound.ShakeBoard);
-                        this.GetBoardFromServer("it-IT");
-                        _gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim() ;
+                        this.GetBoardFromServerAsync("it-IT");
+                        
+                        if (_board != null)
+                        {_gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim() ; }
 
                         break;
 
@@ -601,7 +657,7 @@ namespace WebBoggler
                             _gameControlsPanel.Visibility = Visibility.Collapsed;
                             _gameStatusPanel.Visibility = Visibility.Visible;
                                                           
-                            SendWordList();
+                            SendWordListAsync();
                         }
                         else if (_Mode == DeskMode.Observing)
                         {
@@ -666,7 +722,7 @@ namespace WebBoggler
 		private void _WebSocket_OnClose(object sender, EventArgs e)
 		{
             _WebSocket = null;
-            Leave();  
+            LeaveAsync();  
             _localPlayer.ID = "-1";
             _boardGrid.IsEnabled = false;
 

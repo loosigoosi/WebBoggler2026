@@ -17,9 +17,8 @@ Public Class CORSSupport
         End If
 
         Dim httpRequest = TryCast(request.Properties("httpRequest"), HttpRequestMessageProperty)
-        If httpRequest.Method.ToLower() = "options" Then
-            instanceContext.Abort()
-        End If
+        ' Do not abort the instance context for OPTIONS here - aborting can trigger thread aborts
+        ' and interfere with the ASP.NET pipeline. Global.asax handles OPTIONS preflight responses.
         Return httpRequest
     End Function
 

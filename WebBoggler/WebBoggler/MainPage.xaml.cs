@@ -48,6 +48,7 @@ namespace WebBoggler
             //_Desk.Register();
         }
 
+<<<<<<< HEAD
         private void CmdJoin_Click(object sender, RoutedEventArgs e)
 		{
 
@@ -60,6 +61,19 @@ namespace WebBoggler
                 _Desk.Leave();
             }
 		}
+=======
+        private async void CmdJoin_Click(object sender, RoutedEventArgs e)
+        {
+            if ((cmdJoin.Tag).ToString() == "Join")
+            {
+                await _Desk.Join(txtUserName.Text);
+            }
+            else
+            {
+                _Desk.LeaveAsync();
+            }
+        }
+>>>>>>> Stato di fatto dopo interventi Copilot. Ancora non funzionante.Versione lavorata su Mac con Copilot
 
         private void ChkSounds_Checked(object sender, RoutedEventArgs e)
         {
@@ -76,9 +90,15 @@ namespace WebBoggler
             _Desk.ClearWordEntry();
         }
 
+<<<<<<< HEAD
         private void CmdAddWord_Click(object sender, RoutedEventArgs e)
         {
             var result = _Desk.ValidateWord(_Desk.WordEntry.WordText);
+=======
+        private async void CmdAddWord_Click(object sender, RoutedEventArgs e)
+        {
+            var result = await _Desk.ValidateWordAsync(_Desk.WordEntry.WordText);
+>>>>>>> Stato di fatto dopo interventi Copilot. Ancora non funzionante.Versione lavorata su Mac con Copilot
             if (result)
             {
                 cmdAddWord.Foreground = _cmdAddBrush; //green
@@ -107,12 +127,28 @@ namespace WebBoggler
 
         }
 
+<<<<<<< HEAD
         private void CmdTest_Click(object sender, RoutedEventArgs e)
         {
 			_Desk.WordEntry.Clear();
             _Desk.GetBoardFromServer("it-IT");
             _Desk.Echo(DateTime.Now.ToString());
             _Desk._WebSocket.CloseAsync(); 
+=======
+        private async void CmdTest_Click(object sender, RoutedEventArgs e)
+        {
+            _Desk.WordEntry.Clear();
+            await _Desk.GetBoardFromServerAsync("it-IT");
+            _Desk.Echo(DateTime.Now.ToString());
+            try
+            {
+                if (_Desk._WebSocket != null)
+                {
+                    await _Desk._WebSocket.CloseAsync();
+                }
+            }
+            catch { }
+>>>>>>> Stato di fatto dopo interventi Copilot. Ancora non funzionante.Versione lavorata su Mac con Copilot
         }
 
 		#endregion

@@ -11,7 +11,10 @@
         <!--Background="#FF202020">-->
 
         <Canvas HorizontalAlignment="Stretch" UseLayoutRounding="True">
-            <local:SoundFX x:Name="sfxSoundPlayer"/>
+            <local:SoundFX x:Name="sfxSoundPlayer">
+
+                
+            </local:SoundFX>
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Border HorizontalAlignment="Center" Height="50" Width="505" CornerRadius="5" Margin="10,10,0,10" BorderThickness="2" BorderBrush="#FF303030">
