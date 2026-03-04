@@ -72,11 +72,17 @@ namespace WebBoggler
             }
 
             if (!Mute)
-                try
             {
-                //mediaToPlay.Play();
-            }
+                try
+                {
+                    if (mediaToPlay != null)
+                    {
+                        mediaToPlay.Stop(); // Ferma se sta già suonando
+                        mediaToPlay.Play(); // Riproduci il suono
+                    }
+                }
                 catch { }
+            }
         }
     }
 }

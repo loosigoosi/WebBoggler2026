@@ -1,7 +1,9 @@
 ﻿
 //using System.Windows.Foundation;
+using System;
 using System.Windows;
 //using System.Windows.Xaml;
+using System.Windows.Browser;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -47,12 +49,60 @@ namespace WebBoggler
             rectCover.Visibility = Visibility.Visible;
 
         }
-        //internal void StartShakeBoardAnimation()
-        //{
-        //    stbShakeBoardAnimation.Begin();
-        //    stbBeginShake.Begin();
 
-        //}
+        internal void StartShakeBoardAnimation()
+        {
+            try
+            {
+                // Anima TUTTI i div 81x81 (sfondo + lettere) per un effetto completo
+                string script = @"
+                    (function() {
+                        console.log('Starting dice animation...');
+
+                        const allDivs = document.querySelectorAll('div');
+                        let animatedCount = 0;
+
+                        // Anima TUTTI i div 81x81 (non solo i primi 25)
+                        // così prendiamo sia lo sfondo che le lettere
+                        for (let div of allDivs) {
+                            const style = window.getComputedStyle(div);
+                            const width = parseInt(style.width);
+                            const height = parseInt(style.height);
+
+                            // Se è circa 81x81 px, animalo
+                            if (width >= 75 && width <= 90 && height >= 75 && height <= 90) {
+                                animatedCount++;
+                                // Usa modulo 25 per i delay così si ripetono
+                                const delayClass = 'dice-delay-' + ((animatedCount % 25) + 1);
+                                div.classList.add('dice-shaking', delayClass);
+                            }
+                        }
+
+                        console.log('Applied animation to ' + animatedCount + ' elements (all layers)');
+
+                        // Rimuovi le classi dopo 5 secondi (animazione più lenta)
+                        setTimeout(function() {
+                            console.log('Removing animation classes...');
+                            for (let div of allDivs) {
+                                if (div.classList.contains('dice-shaking')) {
+                                    div.classList.remove('dice-shaking');
+                                    for (let i = 1; i <= 25; i++) {
+                                        div.classList.remove('dice-delay-' + i);
+                                    }
+                                }
+                            }
+                        }, 5000);
+                    })();
+                ";
+
+                HtmlPage.Window.Eval(script);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Animation error: " + ex.Message);
+            }
+        }
+
         internal Visibility CoverVisibility
         {
             get { return rectCover.Visibility; }
@@ -106,7 +156,7 @@ namespace WebBoggler
 				A = 255
 			};
 			brush1.Color = color1;
-			brush1.Opacity = 0.85;
+			brush1.Opacity = 0.95;
 
 			double rectWidth = this.cnvWordPaths.ActualWidth / 5.0;
 			double rectHeight = this.cnvWordPaths.ActualHeight / 5.0;

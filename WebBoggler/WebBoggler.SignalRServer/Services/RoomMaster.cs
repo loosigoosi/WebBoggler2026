@@ -28,7 +28,7 @@ public class RoomMaster
 
     private const int GAME_PRE_START_DELAY = 3000;
 #if DEBUG
-    private const int GAME_ROUND_DURATION_MS = 180000;
+    private const int GAME_ROUND_DURATION_MS = 60000;
 #else
     private const int GAME_ROUND_DURATION_MS = 180000;
 #endif
@@ -154,6 +154,12 @@ public class RoomMaster
     {
         lock (_syncObject)
         {
+            // Parte solo se siamo in attesa (Ready o ShowTime), NON durante un round in corso
+            if (_state != RoomMasterState.Ready && _state != RoomMasterState.ShowTime)
+            {
+                return; // Ignora se c'è un round in corso
+            }
+
             bool everyBodyIsReady = _roomPlayers.Values.All(p => p.IsReady);
             if (everyBodyIsReady && _roomPlayers.Count > 0)
             {
@@ -214,10 +220,10 @@ public class RoomMaster
                 StoreDistributionBoard();
 
                 _state = RoomMasterState.KeepReady;
-                _ = Task.Run(async () =>
+                _ = Task.Run(async () => 
                 {
-                    await _hubContext.Clients.All.SendAsync("GetBoard");
-                    NewMatchKeepReady?.Invoke();
+                    if (NewMatchKeepReady != null)
+                        await NewMatchKeepReady.Invoke();
                 });
 
                 _preStartDelayTimer.Start();
@@ -237,10 +243,10 @@ public class RoomMaster
     {
         _state = RoomMasterState.PauseAfterRound;
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(async () => 
         {
-            await _hubContext.Clients.All.SendAsync("EndRound");
-            RoundTerminate?.Invoke();
+            if (RoundTerminate != null)
+                await RoundTerminate.Invoke();
         });
 
         _preValidationTimer.Start();
@@ -253,10 +259,10 @@ public class RoomMaster
         MarkDuplicatedWords();
         UpdateScores();
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(async () => 
         {
-            await _hubContext.Clients.All.SendAsync("ShowTime");
-            ValidatedResults?.Invoke();
+            if (ValidatedResults != null)
+                await ValidatedResults.Invoke();
         });
 
         _state = RoomMasterState.ShowTime;
@@ -265,67 +271,105 @@ public class RoomMaster
 
     private void MarkDuplicatedWords()
     {
-        foreach (var player1 in _roomPlayers.Values)
+        try
         {
-            if (player1.WordList?.Items == null) continue;
-
-            foreach (var word1 in player1.WordList.Items)
+            foreach (var player1 in _roomPlayers.Values)
             {
-                word1.Duplicated = false;
+                if (player1.WordList?.Items == null) continue;
 
-                foreach (var player2 in _roomPlayers.Values)
+                foreach (var word1 in player1.WordList.Items)
                 {
-                    if (player2.ID == player1.ID) continue;
-                    if (player2.WordList?.Items == null) continue;
+                    if (word1 == null) continue; // Skip null words
 
-                    var wordText1 = GetWordText(word1);
-                    var found = player2.WordList.Items.Any(w => GetWordText(w) == wordText1);
+                    word1.Duplicated = false;
 
-                    if (found)
+                    foreach (var player2 in _roomPlayers.Values)
                     {
-                        word1.Duplicated = true;
-                        break;
+                        if (player2.ID == player1.ID) continue;
+                        if (player2.WordList?.Items == null) continue;
+
+                        var wordText1 = GetWordText(word1);
+                        if (string.IsNullOrEmpty(wordText1)) continue; // Skip invalid words
+
+                        var found = player2.WordList.Items.Any(w => w != null && GetWordText(w) == wordText1);
+
+                        if (found)
+                        {
+                            word1.Duplicated = true;
+                            break;
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in MarkDuplicatedWords: {ex.Message}");
         }
     }
 
     private string GetWordText(Word word)
     {
-        if (word.DicePath == null) return string.Empty;
-        return string.Join("", word.DicePath.Select(d => d.Letter));
+        if (word.DicePath == null || word.DicePath.Count == 0) 
+            return string.Empty;
+
+        try
+        {
+            // Filtra eventuali null nel DicePath prima di fare il join
+            return string.Join("", word.DicePath.Where(d => d != null).Select(d => d.Letter ?? ""));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetWordText: {ex.Message}");
+            return string.Empty;
+        }
     }
 
     private void UpdateScores()
     {
-        foreach (var player in _roomPlayers.Values)
+        try
         {
-            if (player.WordList?.Items == null) continue;
-
-            var wordsList = player.WordList.Items.Where(w => !w.Duplicated).ToList();
-            player.WordList.Items = wordsList.ToArray();
-
-            int score = 0;
-            foreach (var word in player.WordList.Items)
+            foreach (var player in _roomPlayers.Values)
             {
-                var length = word.DicePath?.Count ?? 0;
-                score += length switch
+                if (player.WordList?.Items == null) continue;
+
+                // Filtra parole null e duplicati
+                var wordsList = player.WordList.Items
+                    .Where(w => w != null && !w.Duplicated)
+                    .ToList();
+                player.WordList.Items = wordsList.ToArray();
+
+                int score = 0;
+                foreach (var word in player.WordList.Items)
                 {
-                    3 => 1,
-                    4 => 1,
-                    5 => 2,
-                    6 => 3,
-                    7 => 5,
-                    >= 8 => 11,
-                    _ => 0
-                };
+                    if (word == null) continue; // Safety check
+
+                    var length = word.DicePath?.Count ?? 0;
+                    score += length switch
+                    {
+                        3 => 1,
+                        4 => 1,
+                        5 => 2,
+                        6 => 3,
+                        7 => 5,
+                        >= 8 => 11,
+                        _ => 0
+                    };
+                }
+
+                player.Score += score;
             }
 
-            player.Score += score;
+            _ = Task.Run(async () => 
+            {
+                if (ScoreChange != null)
+                    await ScoreChange.Invoke();
+            });
         }
-
-        ScoreChange?.Invoke();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in UpdateScores: {ex.Message}");
+        }
     }
 
     private void PreStartDelayTimer_Elapsed(object? sender, ElapsedEventArgs e)
@@ -337,10 +381,10 @@ public class RoomMaster
             player.IsReady = false;
         }
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(async () => 
         {
-            await _hubContext.Clients.All.SendAsync("StartRound");
-            RoundStart?.Invoke();
+            if (RoundStart != null)
+                await RoundStart.Invoke();
         });
 
         _roundStartTimeUTC = DateTime.UtcNow;

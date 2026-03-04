@@ -32,41 +32,81 @@ namespace WebBogglerCommonTypes
 
         public static bool operator ==(WordBase w1, WordBase w2)
         {
-            if ((w1.DicePath.Count() == w2.DicePath.Count()) & (w1.WordText.Length == w2.WordText.Length))
+
+            if (w1 != null && w2 != null)
             {
-                for (int i = 0; i <= w1.DicePath.Count() - 1; i++)
+                if ((w1.DicePath.Count() == w2.DicePath.Count()) & (w1.WordText.Length == w2.WordText.Length))
                 {
-                    if (!object.ReferenceEquals(w1.DicePath[i], w2.DicePath[i]))
+                    for (int i = 0; i <= w1.DicePath.Count() - 1; i++)
                     {
-                        return false;
+                        if (!object.ReferenceEquals(w1.DicePath[i], w2.DicePath[i]))
+                        {
+                            return false;
+                        }
                     }
                 }
+                else
+                {
+                    return false;
+                }
+                return true;
             }
             else
             {
                 return false;
             }
-            return true;
         }
         public static bool operator !=(WordBase w1, WordBase w2)
         {
-            if ((w1.DicePath.Count == w2.DicePath.Count()) & (w1.WordText.Length == w2.WordText.Length))
+            if (w1 != null && w2 != null)
             {
-                for (int i = 0; i <= w1.DicePath.Count() - 1; i++)
+                if ((w1.DicePath.Count == w2.DicePath.Count()) & (w1.WordText.Length == w2.WordText.Length))
                 {
-                    var dicePath1 = w1.DicePath[i];
-                    var dicePath2 = w2.DicePath[i];
-                    if (!object.ReferenceEquals(dicePath1, dicePath2))
+                    for (int i = 0; i <= w1.DicePath.Count() - 1; i++)
                     {
-                        return true;
+                        var dicePath1 = w1.DicePath[i];
+                        var dicePath2 = w2.DicePath[i];
+                        if (!object.ReferenceEquals(dicePath1, dicePath2))
+                        {
+                            return true;
+                        }
                     }
                 }
+                else
+                {
+                    return true;
+                }
+                return false;
             }
             else
             {
                 return true;
             }
-            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is WordBase))
+                return false;
+            
+            if (ReferenceEquals(this, obj))
+                return true;
+            
+            return this == (WordBase)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 23 + (WordText != null ? WordText.GetHashCode() : 0);
+            if (_dicePathList != null)
+            {
+                foreach (var dice in _dicePathList)
+                {
+                    hash = hash * 23 + (dice != null ? dice.GetHashCode() : 0);
+                }
+            }
+            return hash;
         }
 
 		public WordStatus Status

@@ -5,13 +5,13 @@
     xmlns:local="using:WebBoggler">
     
     <Grid>
-        <MediaElement x:Name="wavButtonTick" Source="ms-appx:/SoundFX/button-tick.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavErase" Source="ms-appx:/SoundFX/laser.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavStartChime" Source="ms-appx:/SoundFX/1-tone-chime.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavEndChime" Source="ms-appx:/SoundFX/2-tone-chime.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavFail" Source="ms-appx:/SoundFX/fail-short.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavShake" Source="ms-appx:/SoundFX/shaking-pillbottle.mp3" AutoPlay="False"/>
-        <MediaElement x:Name="wavAddWord" Source="ms-appx:/SoundFX/add-word.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavButtonTick" Source="/SoundFX/button-tick.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavErase" Source="/SoundFX/laser.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavStartChime" Source="/SoundFX/1-tone-chime.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavEndChime" Source="/SoundFX/2-tone-chime.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavFail" Source="/SoundFX/fail-short.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavShake" Source="/SoundFX/shaking-pillbottle.mp3" AutoPlay="False"/>
+        <MediaElement x:Name="wavAddWord" Source="/SoundFX/add-word.mp3" AutoPlay="False"/>
     </Grid>
     
 </UserControl>

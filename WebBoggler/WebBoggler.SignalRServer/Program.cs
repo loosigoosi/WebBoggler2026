@@ -33,6 +33,14 @@ var app = builder.Build();
 
 // Initialize RoomMaster to start game logic
 var roomMaster = app.Services.GetRequiredService<RoomMaster>();
+var hubContext = app.Services.GetRequiredService<IHubContext<GameHub>>();
+
+// Subscribe to RoomMaster events to send SignalR messages
+roomMaster.RoundStart += async () => await hubContext.Clients.All.SendAsync("StartRound").ConfigureAwait(false);
+roomMaster.RoundTerminate += async () => await hubContext.Clients.All.SendAsync("EndRound").ConfigureAwait(false);
+roomMaster.ValidatedResults += async () => await hubContext.Clients.All.SendAsync("ShowTime").ConfigureAwait(false);
+roomMaster.NewMatchKeepReady += async () => await hubContext.Clients.All.SendAsync("GetBoard").ConfigureAwait(false);
+roomMaster.ScoreChange += async () => await hubContext.Clients.All.SendAsync("UpdatePlayers").ConfigureAwait(false);
 
 // Configure middleware
 app.UseCors();

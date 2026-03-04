@@ -3,9 +3,15 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:WebBoggler"
+      xmlns:converters="clr-namespace:WebBoggler.Converters"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
       Foreground="{DynamicResource Theme_TextBrush}">
+
+    <Page.Resources>
+        <converters:PlayerReadyToColorConverter x:Key="ReadyToColorConverter"/>
+        <converters:PlayerReadyToFontWeightConverter x:Key="ReadyToFontWeightConverter"/>
+    </Page.Resources>
 
     <Grid Background="{DynamicResource Theme_BackgroundBrush}">
         <!--Background="#FF202020">-->
@@ -23,13 +29,24 @@
                             <TextBlock HorizontalAlignment="Left" Padding="0,1,0,0" Width="300" Height="45" Text="-  Maxi Paroliere online" Margin="0,0,0,0" Foreground="#FFD06000" FontSize="24" FontWeight="Bold" TextAlignment ="Left"/> <!--Background="#00EEEEEE"--> 
                         </StackPanel>
                     </Border>
-                    <Border HorizontalAlignment="Center" Height="50" Width="300" CornerRadius="5" Padding="0,10,10,0" Margin="10,10,0,10" BorderThickness="2" BorderBrush="#FF303030">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <StackPanel x:Name="spLogin" Orientation="Horizontal" VerticalAlignment ="Center" HorizontalAlignment="Right" Visibility="Visible">
+                    <Border HorizontalAlignment="Center" Height="50" Width="300" CornerRadius="5" Padding="0,5,10,5" Margin="10,10,0,10" BorderThickness="2" BorderBrush="#FF303030">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <!-- Prima riga: Nickname e TextBox -->
+                            <StackPanel x:Name="spLogin" Orientation="Horizontal" VerticalAlignment ="Center" HorizontalAlignment="Right" Visibility="Visible" Margin="0,0,0,3">
                                 <TextBox Foreground="#FFE0E0E0" Text="Nickname: " Margin="0,0,5,0" FontSize="12" BorderThickness="0" TextAlignment="Right" Background="#00E0E0E0" Width="80" Height="25" VerticalContentAlignment="Center"/>
-                                <TextBox x:Name="txtUserName" Foreground="#FF101010" Background="#FFE0E0E0" Width="100" Height="25"/>
+                                <TextBox x:Name="txtUserName" Foreground="#FF101010" Background="#FFE0E0E0" Width="100" Height="25" KeyDown="txtUserName_KeyDown"/>
+                                <!-- Pulsante Join quando NON sei loggato -->
+                                <Button x:Name="cmdJoin" IsEnabled="False" Width="90" Height="25" Margin="10,0,0,0" FontSize="14" Content="Partecipa" HorizontalContentAlignment="Center" Tag="Join" />
                             </StackPanel>
-                            <Button x:Name="cmdJoin" IsEnabled="False" Width="90" Height="25" Margin="10,0,10,0" FontSize="14" Content="Partecipa" HorizontalContentAlignment="Center" Tag="Join" /><!--Background="#FF808080"-->
+                            <!-- Seconda riga: Checkbox "Sono pronto" - visibile SOLO dopo il join, nascosta inizialmente -->
+                            <StackPanel x:Name="spReadyPanel" Orientation="Horizontal" HorizontalAlignment="Right" Visibility="Collapsed">
+                                <CheckBox x:Name="chkReady" Content="Sono pronto" 
+                                          HorizontalAlignment="Right" Margin="0,0,10,0" 
+                                          Foreground="#FFEAAA00" FontSize="11" 
+                                          VerticalContentAlignment="Center" 
+                                          Checked="chkReady_Checked" Unchecked="chkReady_Unchecked"/>
+                                <Button x:Name="cmdLeave" Width="90" Height="25" FontSize="14" Content="Abbandona" HorizontalContentAlignment="Center" Click="CmdJoin_Click" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -45,7 +62,11 @@
                                     <DataTemplate>
                                         <Border BorderThickness="1" Height="25" BorderBrush="#FF303030" VerticalAlignment="Center" Margin="1,1,1,0">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Background="#00000000">
-                                                <TextBlock Text="{Binding NickName}" Cursor="Hand" Margin=" 1,1,0,0" Foreground="#FFA0A0F0" Width="115" Height="30" FontSize="14" TextAlignment ="Left" /><!--Background="#00000000"-->
+                                                <TextBlock Text="{Binding NickName}" 
+                                                           Cursor="Hand" Margin=" 1,1,0,0" 
+                                                           Foreground="{Binding IsReady, Converter={StaticResource ReadyToColorConverter}}" 
+                                                           FontWeight="{Binding IsReady, Converter={StaticResource ReadyToFontWeightConverter}}"
+                                                           Width="115" Height="30" FontSize="14" TextAlignment ="Left" /><!--Background="#00000000"-->
                                                 <TextBlock Text="{Binding Score}" Cursor="Hand" Margin=" 1,1,2,0" Foreground="#FFA0A0F0" Width="20" Height="30" FontSize="14" FontWeight="Bold" TextAlignment ="Right" /><!--Background="#0000000"-->
                                             </StackPanel>
                                         </Border>

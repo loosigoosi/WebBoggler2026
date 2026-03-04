@@ -18,8 +18,11 @@ namespace WebBoggler
 		//private const string SIGNALR_HUB_URL = @"http://webbogglerdev.xidea.it/gamehub";
 
 		//local
-		private const string WCFSERVICE_URL = @"http://localhost:8733/gameserver/ServiceWebBoggler.svc";
-		private const string SIGNALR_HUB_URL = @"http://localhost:5170/gamehub";
+			private const string WCFSERVICE_URL = @"http://localhost:8733/gameserver/ServiceWebBoggler.svc";
+			private const string SIGNALR_HUB_URL = @"http://localhost:5170/gamehub";
+
+			// Proprietà pubblica per accedere all'URL nei messagebox
+			internal static string SignalRHubUrl => SIGNALR_HUB_URL;
 
 		////localIIS
 		//private const string WCFSERVICE_URL = @"http://localhost/ServiceWebBoggler.svc";

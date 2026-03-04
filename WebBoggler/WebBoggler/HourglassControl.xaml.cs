@@ -98,8 +98,7 @@ namespace WebBoggler
 
         public void Run()
         {
-            var s = new TranslateTransform() { Y = 0 };
-            rectHourglass.RenderTransform = s;
+            rectHourglass.Height = _hourglassRectHeight;
 
             _Hourglass.Run();
         }
@@ -110,8 +109,7 @@ namespace WebBoggler
 
         public void Reset()
         {
-            var s = new TranslateTransform() { Y = 0 };
-            rectHourglass.RenderTransform = s;
+            rectHourglass.Height = _hourglassRectHeight;
 
             _Hourglass.Reset();
         }
@@ -132,11 +130,10 @@ namespace WebBoggler
         {
             try
             {
-                var s = new TranslateTransform() { X = 0, Y = _hourglassRectHeight * ElapsedPercent / 100 };
-                rectHourglass.RenderTransform = s;
-            TimeSpan tr = ((Hourglass)sender).RemainingTime;
+                rectHourglass.Height = _hourglassRectHeight * (100 - ElapsedPercent) / 100;
+                TimeSpan tr = ((Hourglass)sender).RemainingTime;
 
-            textTime.Text = String.Format("{0:0}:{1:00}",  tr.Minutes, tr.Seconds);
+                textTime.Text = String.Format("{0:0}:{1:00}",  tr.Minutes, tr.Seconds);
 
             }
             catch { }
@@ -150,8 +147,7 @@ namespace WebBoggler
         {
             textTime.Text = "0:00";
 
-            var s = new TranslateTransform() { Y = _hourglassRectHeight  };
-            rectHourglass.RenderTransform = s;
+            rectHourglass.Height = 0;
         }
     }
 

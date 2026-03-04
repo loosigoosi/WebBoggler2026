@@ -38,6 +38,8 @@
     <Compile Include="BoardGrid.xaml.cs" />
     <Compile Include="Connected Services\WebBogglerServer\Reference.cs" />
     <Compile Include="Connected Services\WebBogglerSockets\Reference.cs" />
+    <Compile Include="Converters\PlayerReadyToColorConverter.cs" />
+    <Compile Include="Converters\PlayerReadyToFontWeightConverter.cs" />
     <Compile Include="Desk.cs" />
     <Compile Include="Dice.cs" />
     <Compile Include="Dices.cs" />
@@ -76,6 +78,7 @@
     <Content Include="Assets\favicon.ico" />
     <Content Include="Assets\itFlag.png" />
     <Content Include="Assets\itFlag_tiny.png" />
+    <Content Include="Connected Services\WebBogglerServer\ConnectedService.json" />
     <Content Include="SoundFX\1-tone-chime.mp3" />
     <Content Include="SoundFX\2-tone-chime.mp3" />
     <Content Include="SoundFX\add-word.mp3" />
@@ -86,7 +89,6 @@
     <Content Include="SoundFX\laser.mp3" />
     <Content Include="SoundFX\shaking-pillbottle.mp3" />
     <Content Include="SoundFX\tail.mp3" />
-    <Content Include="Connected Services\WebBogglerServer\ConnectedService.json" />
     <Content Include="Connected Services\WebBogglerSockets\ConnectedService.json" />
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>

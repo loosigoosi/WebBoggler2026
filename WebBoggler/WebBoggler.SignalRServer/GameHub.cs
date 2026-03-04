@@ -73,7 +73,8 @@ public class GameHub : Hub
                 _roomMaster.TryStartNewRoundNow();
             }
         }
-        await Task.CompletedTask;
+        // Notifica tutti i client dell'aggiornamento stato giocatori
+        await Clients.All.SendAsync("UpdatePlayers");
     }
 
     public async Task NotReady()
@@ -85,7 +86,8 @@ public class GameHub : Hub
                 _roomMaster.SetPlayerReadyState(clientId, false);
             }
         }
-        await Task.CompletedTask;
+        // Notifica tutti i client dell'aggiornamento stato giocatori
+        await Clients.All.SendAsync("UpdatePlayers");
     }
 
     public async Task Echo(string message)

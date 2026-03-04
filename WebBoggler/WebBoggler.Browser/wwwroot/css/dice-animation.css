@@ -1,0 +1,86 @@
+/* Animazione shaking dei dadi per OpenSilver */
+
+@keyframes diceShake {
+    0% {
+        transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    }
+    10% {
+        transform: rotateX(45deg) rotateY(30deg) rotateZ(15deg) scale(0.95);
+    }
+    20% {
+        transform: rotateX(90deg) rotateY(60deg) rotateZ(30deg) scale(0.9);
+    }
+    35% {
+        transform: rotateX(180deg) rotateY(120deg) rotateZ(60deg) scale(0.9);
+    }
+    50% {
+        transform: rotateX(360deg) rotateY(240deg) rotateZ(120deg) scale(0.85);
+    }
+    65% {
+        transform: rotateX(540deg) rotateY(360deg) rotateZ(180deg) scale(0.9);
+    }
+    80% {
+        transform: rotateX(720deg) rotateY(480deg) rotateZ(240deg) scale(0.95);
+    }
+    90% {
+        transform: rotateX(900deg) rotateY(600deg) rotateZ(300deg) scale(0.98);
+    }
+    100% {
+        transform: rotateX(1080deg) rotateY(720deg) rotateZ(360deg) scale(1);
+    }
+}
+
+/* Classe da applicare agli elementi dei dadi */
+.dice-shaking {
+    animation: diceShake 5s ease-in-out;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+/* Delay diversi per effetto cascata */
+.dice-delay-1 { animation-delay: 0.05s; }
+.dice-delay-2 { animation-delay: 0.1s; }
+.dice-delay-3 { animation-delay: 0.15s; }
+.dice-delay-4 { animation-delay: 0.08s; }
+.dice-delay-5 { animation-delay: 0.12s; }
+.dice-delay-6 { animation-delay: 0.06s; }
+.dice-delay-7 { animation-delay: 0.14s; }
+.dice-delay-8 { animation-delay: 0.09s; }
+.dice-delay-9 { animation-delay: 0.11s; }
+.dice-delay-10 { animation-delay: 0.07s; }
+.dice-delay-11 { animation-delay: 0.04s; }
+.dice-delay-12 { animation-delay: 0.13s; }
+.dice-delay-13 { animation-delay: 0.1s; }
+.dice-delay-14 { animation-delay: 0.16s; }
+.dice-delay-15 { animation-delay: 0.03s; }
+.dice-delay-16 { animation-delay: 0.12s; }
+.dice-delay-17 { animation-delay: 0.08s; }
+.dice-delay-18 { animation-delay: 0.11s; }
+.dice-delay-19 { animation-delay: 0.15s; }
+.dice-delay-20 { animation-delay: 0.05s; }
+.dice-delay-21 { animation-delay: 0.09s; }
+.dice-delay-22 { animation-delay: 0.07s; }
+.dice-delay-23 { animation-delay: 0.13s; }
+.dice-delay-24 { animation-delay: 0.06s; }
+.dice-delay-25 { animation-delay: 0.14s; }
+
+/* Animazione per la griglia principale */
+@keyframes boardShake {
+    0%, 100% {
+        transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1);
+    }
+    20% {
+        transform: perspective(800px) rotateX(-15deg) rotateY(10deg) scale(0.95);
+    }
+    50% {
+        transform: perspective(800px) rotateX(-20deg) rotateY(-15deg) scale(0.9);
+    }
+    80% {
+        transform: perspective(800px) rotateX(-10deg) rotateY(5deg) scale(0.95);
+    }
+}
+
+.board-shaking {
+    animation: boardShake 5s ease-in-out;
+    transform-style: preserve-3d;
+}

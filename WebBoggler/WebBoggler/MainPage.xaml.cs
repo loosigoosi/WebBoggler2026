@@ -24,7 +24,7 @@ namespace WebBoggler
                             txtWordCount, txtFoundWordCount, txtInputWord, 
                             cmdAddWord, lbWordList, panPlayersWordList, panLocalWordList, lbPlayersWordList, lbSolution,   
                             lbPlayersList,spLogin, txtUserName,  
-                            cmdJoin, sfxSoundPlayer);
+                            cmdJoin, chkReady, spReadyPanel, sfxSoundPlayer);
 
             _cmdAddBrush = cmdAddWord.Foreground;
 
@@ -38,6 +38,8 @@ namespace WebBoggler
             this.txtUserName.TextChanged += TxtUserName_TextChanged;
             this.chkSounds.Unchecked += ChkSounds_Unchecked;
             this.chkSounds.Checked += ChkSounds_Checked;
+            this.chkReady.Checked += chkReady_Checked;
+            this.chkReady.Unchecked += chkReady_Unchecked;
 		}
 
         #region "Event Handlers"
@@ -95,6 +97,15 @@ namespace WebBoggler
 
         }
 
+        private void txtUserName_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter && cmdJoin.IsEnabled)
+            {
+                // Simula il click sul pulsante Join
+                CmdJoin_Click(cmdJoin, new RoutedEventArgs());
+            }
+        }
+
         private void TxtUserName_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (((TextBox)sender).Text.Length >= 3)
@@ -109,22 +120,34 @@ namespace WebBoggler
         }
 
 
-        private async void CmdTest_Click(object sender, RoutedEventArgs e)
-        {
-            _Desk.WordEntry.Clear();
-            await _Desk.GetBoardFromServerAsync("it-IT");
-            _Desk.Echo(DateTime.Now.ToString());
-            try
-            {
-                if (_Desk._WebSocket != null)
-                {
-                    await _Desk._WebSocket.DisconnectAsync();
-                }
-            }
-            catch { }
-        }
+		private async void CmdTest_Click(object sender, RoutedEventArgs e)
+		{
+			_Desk.WordEntry.Clear();
+			await _Desk.GetBoardFromServerAsync("it-IT");
+			_Desk.Echo(DateTime.Now.ToString());
+			try
+			{
+				if (_Desk._WebSocket != null)
+				{
+					await _Desk._WebSocket.DisconnectAsync();
+				}
+			}
+			catch { }
+		}
 
-		#endregion
+		private void chkReady_Checked(object sender, RoutedEventArgs e)
+		{
+			// Invia "READY" al server
+			_Desk._WebSocket?.Send("READY");
+		}
+
+		private void chkReady_Unchecked(object sender, RoutedEventArgs e)
+			{
+				// Invia "NOTREADY" al server
+				_Desk._WebSocket?.Send("NOTREADY");
+			}
+
+			#endregion
 	}
 
 }

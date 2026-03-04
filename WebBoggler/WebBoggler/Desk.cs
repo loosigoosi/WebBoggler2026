@@ -41,6 +41,8 @@ namespace WebBoggler
         private ListBox _playersListControl;
         private Button _cmdAddWord;
         private Button _cmdJoin;
+        private CheckBox _chkReady;
+        private StackPanel _readyPanel;
         private SoundFX _soundFX;
         private Brush _cmdAddBrush;
         private Word _wordEntry = new Word();
@@ -72,7 +74,7 @@ namespace WebBoggler
                     Button addWordButton, ListBox wordListControl,
                     StackPanel playersWordListPanel, StackPanel localWordListPanel, ListBox playersWordListControl, ListBox solutionControl,
                     ListBox playersListControl, StackPanel loginPanel, TextBox userNameTextBox,
-                    Button cmdJoin, SoundFX soundFXControl)
+                    Button cmdJoin, CheckBox chkReady, StackPanel readyPanel, SoundFX soundFXControl)
         {
             _gameControlsPanel = gameControlsPanel;
             _gameStatusPanel = gameStatusPanel;
@@ -92,7 +94,9 @@ namespace WebBoggler
             _gameControlsPanel.Visibility = Visibility.Collapsed;
             _gameStatusPanel.Visibility = Visibility.Visible;
             _cmdJoin = cmdJoin;
-            _soundFX = soundFXControl; 
+            _chkReady = chkReady;
+            _readyPanel = readyPanel;
+            _soundFX = soundFXControl;
             _loginPanel = loginPanel;
             _userNameTextBox = userNameTextBox;
             _boardGrid = boardGrid;
@@ -166,9 +170,10 @@ namespace WebBoggler
             }
             catch (Exception ex)
             {
+                string serverUrl = ServiceConnector.SignalRHubUrl.Replace("/gamehub", "");
                 string errorMessage = "Impossibile connettersi al server di gioco.\n\n";
                 errorMessage += "Verifica che il server SignalR sia in esecuzione su:\n";
-                errorMessage += "http://localhost:5170\n\n";
+                errorMessage += serverUrl + "\n\n";
                 errorMessage += "Per avviare il server, esegui:\n";
                 errorMessage += "dotnet run --project WebBoggler.SignalRServer\n\n";
                 errorMessage += "Dettagli errore: " + ex.Message;
@@ -236,6 +241,14 @@ namespace WebBoggler
                     }
                     _Mode = DeskMode.Playing;
                     _loginPanel.Visibility = Visibility.Collapsed;
+                    if (_readyPanel != null)
+                    {
+                        _readyPanel.Visibility = Visibility.Visible; // Mostra pannello "Sono pronto" + "Abbandona"
+                    }
+                    if (_chkReady != null)
+                    {
+                        _chkReady.IsChecked = false; // Reset dello stato
+                    }
                     _wordListControl.SelectionChanged += _wordListControl_SelectionChanged;
                     _cmdJoin.Content = "Abbandona";
                     _cmdJoin.Tag = "Leave";
@@ -268,6 +281,14 @@ namespace WebBoggler
                     _boardGrid.ShowCover();
                     _Hourglass.ShowCover();
                     _Hourglass.Visibility = Visibility.Visible;
+                    if (_readyPanel != null)
+                    {
+                        _readyPanel.Visibility = Visibility.Collapsed; // Nascondi pannello ready
+                    }
+                    if (_chkReady != null)
+                    {
+                        _chkReady.IsChecked = false; // Reset dello stato
+                    }
                     _cmdJoin.Content = "Partecipa";
                     _cmdJoin.IsEnabled = false;
                     _cmdJoin.Tag = "Join";
@@ -628,6 +649,9 @@ namespace WebBoggler
 						if (_board != null)
 						{
 							_gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim();
+							_boardGrid.SetBoard(_board.DicesVector);
+							// TODO: Riabilitare animazione dadi quando sarà semplificata
+							//_boardGrid.StartShakeBoardAnimation();
 						}
 
 						break;
@@ -660,26 +684,26 @@ namespace WebBoggler
 
                         break;
 
-				    case "END_ROUND":
+					case "END_ROUND":
 
-                        _gameStatusText.Text = "Tempo scaduto.";
-                        if (_Mode == DeskMode.Playing)
-                        {
-                            _soundFX.PlaySound(Sound.EndGame);  
-                            _boardGrid.IsEnabled = false;
-                            _wordEntry.Clear();
-                            _gameControlsPanel.Visibility = Visibility.Collapsed;
-                            _gameStatusPanel.Visibility = Visibility.Visible;
-                                                          
-                            SendWordListAsync();
-                        }
-                        else if (_Mode == DeskMode.Observing)
-                        {
-                            _boardGrid.ShowCover();
-                            _boardGrid.IsEnabled = false;
-                        }
+						_gameStatusText.Text = "Tempo scaduto.";
+						if (_Mode == DeskMode.Playing)
+						{
+							_soundFX.PlaySound(Sound.EndGame);  
+							_boardGrid.IsEnabled = false;
+							_wordEntry.Clear();
+							_gameControlsPanel.Visibility = Visibility.Collapsed;
+							_gameStatusPanel.Visibility = Visibility.Visible;
 
-                        break;
+							await SendWordListAsync(); // FIX: Await per evitare deadlock
+						}
+						else if (_Mode == DeskMode.Observing)
+						{
+							_boardGrid.ShowCover();
+							_boardGrid.IsEnabled = false;
+						}
+
+						break;
 
 				    case "SHOW_TIME":
 
@@ -713,12 +737,24 @@ namespace WebBoggler
 
 					    break;
 
-				    case "UPDATE_PLAYERS":
+					case "UPDATE_PLAYERS":
 
-                        _Players = await UpdatePlayers();
-                        _playersListControl.ItemsSource = _Players;
+						_Players = await UpdatePlayers();
 
-                        break;
+						// DEBUG: Log stato IsReady dei giocatori
+						if (_Players != null)
+						{
+							foreach (var p in _Players)
+							{
+								System.Diagnostics.Debug.WriteLine($"Player: {p.NickName}, IsReady: {p.IsReady}");
+							}
+						}
+
+						// Forza il refresh della ListBox riassegnando ItemsSource
+						_playersListControl.ItemsSource = null;
+						_playersListControl.ItemsSource = _Players;
+
+						break;
 
                     //default:
                     //  System.Windows.MessageBox.Show(e.Data.ToString());
@@ -735,12 +771,22 @@ namespace WebBoggler
 
 		private void _WebSocket_OnClose(object sender, EventArgs e)
 		{
-            _WebSocket = null;
-            LeaveAsync();  
-            _localPlayer.ID = "-1";
-            _boardGrid.IsEnabled = false;
+			_WebSocket = null;
 
-        }
+			// Mostra messagebox di perdita connessione
+			string serverUrl = ServiceConnector.SignalRHubUrl.Replace("/gamehub", "");
+			string errorMessage = "Connessione al server di gioco persa.\n\n";
+			errorMessage += "Il server potrebbe essere stato arrestato o potresti aver perso la connessione di rete.\n\n";
+			errorMessage += "Server: " + serverUrl + "\n\n";
+			errorMessage += "Verifica che il server SignalR sia ancora in esecuzione e riavvia l'applicazione.";
+
+			System.Windows.MessageBox.Show(errorMessage, "Connessione Persa", MessageBoxButton.OK);
+
+			LeaveAsync();  
+			_localPlayer.ID = "-1";
+			_boardGrid.IsEnabled = false;
+
+		}
 
 #endregion
 
