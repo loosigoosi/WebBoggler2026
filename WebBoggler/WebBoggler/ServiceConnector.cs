@@ -106,7 +106,20 @@ namespace WebBoggler
 
 				_connection.On("ShowTime", () =>
 				{
-					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "SHOW_TIME" }));
+					System.Diagnostics.Debug.WriteLine("[ServiceConnector] ShowTime event received from server");
+					try
+					{
+						PostInvoke(() =>
+						{
+							System.Diagnostics.Debug.WriteLine("[ServiceConnector] PostInvoke executing for ShowTime");
+							OnMessage?.Invoke(this, new MessageEventArgs { Data = "SHOW_TIME" });
+							System.Diagnostics.Debug.WriteLine("[ServiceConnector] OnMessage invoked for ShowTime");
+						});
+					}
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[ServiceConnector] ERROR in ShowTime handler: {ex.Message}");
+					}
 				});
 
 				_connection.On("UpdatePlayers", () =>
@@ -276,15 +289,25 @@ namespace WebBoggler
 
 		public async Task SendWordListAsync(WebBogglerServer.WordList wordList, string clientID)
 		{
+			System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] START - clientID: {clientID}");
+			System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] wordList items: {wordList?.Items?.Length ?? 0}");
+
 			if (_connection == null || _connection.State != HubConnectionState.Connected)
+			{
+				System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] ERROR: Connection not available! State: {_connection?.State}");
 				return;
+			}
 
 			try
 			{
+				System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] Calling InvokeAsync('SendWordList')...");
 				await _connection.InvokeAsync("SendWordList", wordList, clientID);
+				System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] InvokeAsync completed successfully");
 			}
 			catch (Exception ex)
 			{
+				System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] EXCEPTION: {ex.Message}");
+				System.Diagnostics.Debug.WriteLine($"[ServiceConnector.SendWordListAsync] Stack: {ex.StackTrace}");
 				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
 			}
 		}
@@ -296,10 +319,20 @@ namespace WebBoggler
 
 			try
 			{
-				return await _connection.InvokeAsync<WebBogglerServer.Players>("GetPlayers", clientID);
+				System.Diagnostics.Debug.WriteLine($"[GetPlayersAsync] Calling server with clientID: {clientID}");
+				var result = await _connection.InvokeAsync<WebBogglerServer.Players>("GetPlayers", clientID).ConfigureAwait(false);
+				System.Diagnostics.Debug.WriteLine($"[GetPlayersAsync] Received response, Items count: {result?.Items?.Length ?? 0}");
+
+				if (result?.Items != null && result.Items.Length > 0)
+				{
+					System.Diagnostics.Debug.WriteLine($"[GetPlayersAsync] First player: {result.Items[0]?.NickName}, WordList items: {result.Items[0]?.WordList?.Items?.Length ?? 0}");
+				}
+
+				return result;
 			}
 			catch (Exception ex)
 			{
+				System.Diagnostics.Debug.WriteLine($"[GetPlayersAsync] ERROR: {ex.Message}\n{ex.StackTrace}");
 				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
 				return null;
 			}
@@ -312,10 +345,14 @@ namespace WebBoggler
 
 			try
 			{
-				return await _connection.InvokeAsync<WebBogglerServer.WordList>("GetSolution");
+				System.Diagnostics.Debug.WriteLine("[GetSolutionAsync] Calling server...");
+				var result = await _connection.InvokeAsync<WebBogglerServer.WordList>("GetSolution").ConfigureAwait(false);
+				System.Diagnostics.Debug.WriteLine($"[GetSolutionAsync] Received response, Items count: {result?.Items?.Length ?? 0}");
+				return result;
 			}
 			catch (Exception ex)
 			{
+				System.Diagnostics.Debug.WriteLine($"[GetSolutionAsync] ERROR: {ex.Message}\n{ex.StackTrace}");
 				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
 				return null;
 			}

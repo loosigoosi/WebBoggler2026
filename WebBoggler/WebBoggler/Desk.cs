@@ -414,15 +414,43 @@ namespace WebBoggler
 
         private async Task SendWordListAsync()
         {
-            // Rely on the implicit conversion operator between local WordList and proxy WordList
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] START - _wordList count: {_wordList?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] localPlayer.ID: {_localPlayer?.ID}");
+
                 if (_WebSocket != null)
                 {
-                    await _WebSocket.SendWordListAsync(_wordList, _localPlayer.ID);
+                    System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] Converting WordList explicitly...");
+
+                    // Conversione ESPLICITA invece di affidarsi alla conversione implicita
+                    var proxyWordList = new WebBogglerServer.WordList
+                    {
+                        Items = _wordList.Select(w => new WebBogglerServer.Word
+                        {
+                            DicePath = w.DicePath?.Select(d => new WebBogglerServer.Dice
+                            {
+                                Index = d.Index,
+                                Letter = d.Letter,
+                                Rotation = d.Rotation
+                            }).ToArray()
+                        }).ToArray()
+                    };
+
+                    System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] Converted successfully, calling SendWordListAsync...");
+                    await _WebSocket.SendWordListAsync(proxyWordList, _localPlayer.ID);
+                    System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] SendWordListAsync completed successfully");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] ERROR: _WebSocket is NULL!");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] EXCEPTION: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[SendWordListAsync] Stack: {ex.StackTrace}");
+            }
         }
 
         private async Task<Players> UpdatePlayers()
@@ -430,15 +458,25 @@ namespace WebBoggler
             Players plys = null;
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[UpdatePlayers] Starting with localPlayer.ID: {_localPlayer.ID}");
                 if (_WebSocket != null)
                 {
                     var resp = await _WebSocket.GetPlayersAsync(_localPlayer.ID);
+                    System.Diagnostics.Debug.WriteLine($"[UpdatePlayers] Response received: {resp != null}");
                     if (resp != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[UpdatePlayers] Converting to Players type...");
                         plys = (Players)resp;
+                        System.Diagnostics.Debug.WriteLine($"[UpdatePlayers] Converted successfully, count: {plys?.Count() ?? 0}");
+                    }
                 }
             }
-            catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message);  return null;}
-
+            catch (Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine($"[UpdatePlayers] EXCEPTION: {ex.Message}\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"UpdatePlayers error:\n{ex.Message}");
+                return null;
+            }
 
             return plys;
         }
@@ -448,14 +486,25 @@ namespace WebBoggler
             WordList sol = null;
             try
             {
+                System.Diagnostics.Debug.WriteLine("[GetSolution] Starting...");
                 if (_WebSocket != null)
                 {
                     var resp = await _WebSocket.GetSolutionAsync();
+                    System.Diagnostics.Debug.WriteLine($"[GetSolution] Response received: {resp != null}");
                     if (resp != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("[GetSolution] Converting to WordList type...");
                         sol = (WordList)resp;
+                        System.Diagnostics.Debug.WriteLine($"[GetSolution] Converted successfully, count: {sol?.Count() ?? 0}");
+                    }
                 }
             }
-            catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message); return null; }
+            catch (Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine($"[GetSolution] EXCEPTION: {ex.Message}\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"GetSolution error:\n{ex.Message}");
+                return null;
+            }
 
             return sol;
 
@@ -613,8 +662,11 @@ namespace WebBoggler
 
 		private async void _WebSocket_OnMessage(object sender, MessageEventArgs e)
 		{
+			System.Diagnostics.Debug.WriteLine($"[OnMessage] RAW MESSAGE ARRIVED: '{e.Data}'");
+
 			var msg = (e.Data.ToString().ToUpper());
-            if(msg.Substring(0,1) == "#") //Alla richiesta di registrazione il server invia il client ID assegnato preceduto da #
+			System.Diagnostics.Debug.WriteLine($"[OnMessage] Processed: '{msg}'");
+			if(msg.Substring(0,1) == "#") //Alla richiesta di registrazione il server invia il client ID assegnato preceduto da #
             {
                 //Lo memorizzo e in seguito lo uso per il Join
                 _localPlayer.ID = msg.Remove(0,1);
@@ -705,29 +757,36 @@ namespace WebBoggler
 
 						break;
 
-				    case "SHOW_TIME":
+					case "SHOW_TIME":
 
-                        _gameStatusText.Text = "Controllo parole e punteggio...";
+						System.Diagnostics.Debug.WriteLine("[SHOW_TIME] Starting...");
+						_gameStatusText.Text = "Controllo parole e punteggio...";
 
-                        _Players = await UpdatePlayers();
-                        _playersListControl.ItemsSource = _Players;
-                        _playersWordListControl.SelectionChanged += _playersWordListControl_SelectionChanged;
-                        _Solution = await GetSolution();
-                        _solutionControl.ItemsSource = _Solution;
-                        _solutionControl.SelectionChanged += _solutionControl_SelectionChanged;
+						System.Diagnostics.Debug.WriteLine("[SHOW_TIME] Calling UpdatePlayers...");
+						_Players = await UpdatePlayers();
+						System.Diagnostics.Debug.WriteLine($"[SHOW_TIME] UpdatePlayers returned: {_Players?.Count() ?? 0} players");
+						_playersListControl.ItemsSource = _Players;
+						_playersWordListControl.SelectionChanged += _playersWordListControl_SelectionChanged;
 
-                        if (_Mode == DeskMode.Playing)
-                        {
-					        _boardGrid.IsEnabled = false;
-					        _boardGrid.HideCover();
-                            _Hourglass.ShowCover();
-                            _playersWordListPanel.Visibility = Visibility.Visible;
-                            _localWordListPanel.Visibility = Visibility.Collapsed;
-                            _Hourglass.Visibility = Visibility.Collapsed;
-                            _playersWordListControl.SelectionChanged += _playersWordListControl_SelectionChanged;
-                         }
+						System.Diagnostics.Debug.WriteLine("[SHOW_TIME] Calling GetSolution...");
+						_Solution = await GetSolution();
+						System.Diagnostics.Debug.WriteLine($"[SHOW_TIME] GetSolution returned: {_Solution?.Count() ?? 0} words");
+						_solutionControl.ItemsSource = _Solution;
+						_solutionControl.SelectionChanged += _solutionControl_SelectionChanged;
 
-                        break;
+						if (_Mode == DeskMode.Playing)
+						{
+							_boardGrid.IsEnabled = false;
+							_boardGrid.HideCover();
+							_Hourglass.ShowCover();
+							_playersWordListPanel.Visibility = Visibility.Visible;
+							_localWordListPanel.Visibility = Visibility.Collapsed;
+							_Hourglass.Visibility = Visibility.Collapsed;
+							_playersWordListControl.SelectionChanged += _playersWordListControl_SelectionChanged;
+						 }
+
+						System.Diagnostics.Debug.WriteLine("[SHOW_TIME] Completed successfully");
+						break;
 
 				    case "REGISTERED":
 
@@ -747,6 +806,17 @@ namespace WebBoggler
 							foreach (var p in _Players)
 							{
 								System.Diagnostics.Debug.WriteLine($"Player: {p.NickName}, IsReady: {p.IsReady}");
+							}
+						}
+
+						// Sincronizza checkbox locale con stato server
+						if (_chkReady != null && _Players != null)
+						{
+							var localPlayerInList = _Players.FirstOrDefault(p => p.ID == _localPlayer.ID);
+							if (localPlayerInList != null)
+							{
+								_chkReady.IsChecked = localPlayerInList.IsReady;
+								System.Diagnostics.Debug.WriteLine($"[UPDATE_PLAYERS] Synced chkReady to {localPlayerInList.IsReady}");
 							}
 						}
 

@@ -36,11 +36,54 @@ var roomMaster = app.Services.GetRequiredService<RoomMaster>();
 var hubContext = app.Services.GetRequiredService<IHubContext<GameHub>>();
 
 // Subscribe to RoomMaster events to send SignalR messages
-roomMaster.RoundStart += async () => await hubContext.Clients.All.SendAsync("StartRound").ConfigureAwait(false);
-roomMaster.RoundTerminate += async () => await hubContext.Clients.All.SendAsync("EndRound").ConfigureAwait(false);
-roomMaster.ValidatedResults += async () => await hubContext.Clients.All.SendAsync("ShowTime").ConfigureAwait(false);
-roomMaster.NewMatchKeepReady += async () => await hubContext.Clients.All.SendAsync("GetBoard").ConfigureAwait(false);
-roomMaster.ScoreChange += async () => await hubContext.Clients.All.SendAsync("UpdatePlayers").ConfigureAwait(false);
+roomMaster.RoundStart += async () =>
+{
+    Console.WriteLine("[Program.RoundStart] Event fired, sending StartRound to all clients...");
+    await hubContext.Clients.All.SendAsync("StartRound");
+    Console.WriteLine("[Program.RoundStart] StartRound sent successfully");
+};
+
+roomMaster.RoundTerminate += async () =>
+{
+    Console.WriteLine("[Program.RoundTerminate] Event fired, sending EndRound to all clients...");
+    await hubContext.Clients.All.SendAsync("EndRound");
+    Console.WriteLine("[Program.RoundTerminate] EndRound sent successfully");
+};
+
+roomMaster.ValidatedResults += async () =>
+{
+    Console.WriteLine("[Program.ValidatedResults] Event fired, sending ShowTime to all clients...");
+    try
+    {
+        await hubContext.Clients.All.SendAsync("ShowTime");
+        Console.WriteLine("[Program.ValidatedResults] ShowTime sent successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Program.ValidatedResults] ERROR sending ShowTime: {ex.Message}");
+    }
+};
+
+roomMaster.NewMatchKeepReady += async () =>
+{
+    Console.WriteLine("[Program.NewMatchKeepReady] Event fired, sending GetBoard to all clients...");
+    await hubContext.Clients.All.SendAsync("GetBoard");
+    Console.WriteLine("[Program.NewMatchKeepReady] GetBoard sent successfully");
+};
+
+roomMaster.ScoreChange += async () =>
+{
+    Console.WriteLine("[Program.ScoreChange] Event fired, sending UpdatePlayers to all clients...");
+    await hubContext.Clients.All.SendAsync("UpdatePlayers");
+    Console.WriteLine("[Program.ScoreChange] UpdatePlayers sent successfully");
+};
+
+roomMaster.BoardDiscarded += async () =>
+{
+    Console.WriteLine("[Program.BoardDiscarded] Event fired, board was discarded by all players");
+    // Il NewMatchKeepReady verrà chiamato subito dopo da CheckDiscard
+    // Questo evento può essere usato per statistiche o log
+};
 
 // Configure middleware
 app.UseCors();

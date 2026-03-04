@@ -65,12 +65,19 @@ public class GameHub : Hub
 
     public async Task Ready()
     {
+        Console.WriteLine($"[GameHub.Ready] Called by ConnectionId: {Context.ConnectionId}");
+
         lock (_lockObject)
         {
             if (_connectionToClientId.TryGetValue(Context.ConnectionId, out var clientId))
             {
+                Console.WriteLine($"[GameHub.Ready] Setting clientId {clientId} to READY");
                 _roomMaster.SetPlayerReadyState(clientId, true);
                 _roomMaster.TryStartNewRoundNow();
+            }
+            else
+            {
+                Console.WriteLine($"[GameHub.Ready] ERROR: ConnectionId {Context.ConnectionId} not found in mapping!");
             }
         }
         // Notifica tutti i client dell'aggiornamento stato giocatori
@@ -79,11 +86,18 @@ public class GameHub : Hub
 
     public async Task NotReady()
     {
+        Console.WriteLine($"[GameHub.NotReady] Called by ConnectionId: {Context.ConnectionId}");
+
         lock (_lockObject)
         {
             if (_connectionToClientId.TryGetValue(Context.ConnectionId, out var clientId))
             {
+                Console.WriteLine($"[GameHub.NotReady] Setting clientId {clientId} to NOT READY");
                 _roomMaster.SetPlayerReadyState(clientId, false);
+            }
+            else
+            {
+                Console.WriteLine($"[GameHub.NotReady] ERROR: ConnectionId {Context.ConnectionId} not found in mapping!");
             }
         }
         // Notifica tutti i client dell'aggiornamento stato giocatori
@@ -148,10 +162,36 @@ public class GameHub : Hub
 
     public async Task<bool> Join(string clientID, string userName)
     {
-        var result = _roomMaster.AddRoundPlayer(clientID, userName);
+        Console.WriteLine($"[GameHub.Join] Called by ConnectionId: {Context.ConnectionId}, client sent clientID: {clientID}, userName: {userName}");
+
+        // IMPORTANTE: Ignora il clientID inviato dal client, usa quello mappato dal ConnectionId
+        string? mappedClientId = null;
+
+        lock (_lockObject)
+        {
+            if (_connectionToClientId.TryGetValue(Context.ConnectionId, out mappedClientId))
+            {
+                Console.WriteLine($"[GameHub.Join] Using mapped clientID: {mappedClientId} instead of {clientID}");
+            }
+            else
+            {
+                Console.WriteLine($"[GameHub.Join] ERROR: ConnectionId {Context.ConnectionId} not found in mapping!");
+            }
+        }
+
+        if (mappedClientId == null)
+        {
+            return await Task.FromResult(false);
+        }
+
+        var result = _roomMaster.AddRoundPlayer(mappedClientId, userName);
+        Console.WriteLine($"[GameHub.Join] AddRoundPlayer result: {result}");
 
         if (result)
         {
+            // Controlla se serve resettare il gioco (secondo giocatore)
+            _roomMaster.OnPlayerJoined();
+
             await Clients.All.SendAsync("UpdatePlayers");
         }
 
@@ -173,7 +213,29 @@ public class GameHub : Hub
 
     public async Task SendWordList(WordList wordList, string clientID)
     {
-        _roomMaster.AddWordList(wordList, clientID);
+        Console.WriteLine($"[GameHub.SendWordList] Called by ConnectionId: {Context.ConnectionId}, client sent clientID: {clientID}");
+
+        // Usa il mapped ID invece di quello inviato dal client
+        string? mappedClientId = null;
+
+        lock (_lockObject)
+        {
+            if (_connectionToClientId.TryGetValue(Context.ConnectionId, out mappedClientId))
+            {
+                Console.WriteLine($"[GameHub.SendWordList] Using mapped clientID: {mappedClientId}, wordList has {wordList.Items?.Length ?? 0} words");
+            }
+            else
+            {
+                Console.WriteLine($"[GameHub.SendWordList] ERROR: ConnectionId {Context.ConnectionId} not found in mapping!");
+            }
+        }
+
+        if (mappedClientId != null)
+        {
+            _roomMaster.AddWordList(wordList, mappedClientId);
+            Console.WriteLine($"[GameHub.SendWordList] WordList added successfully for player {mappedClientId}");
+        }
+
         await Task.CompletedTask;
     }
 
@@ -191,6 +253,32 @@ public class GameHub : Hub
             solution = new WordList { Items = Array.Empty<Word>() };
         }
         return await Task.FromResult(solution);
+    }
+
+    public async Task ProposeDiscard(bool wantsDiscard)
+    {
+        Console.WriteLine($"[GameHub.ProposeDiscard] Called by ConnectionId: {Context.ConnectionId}, wantsDiscard: {wantsDiscard}");
+
+        lock (_lockObject)
+        {
+            if (_connectionToClientId.TryGetValue(Context.ConnectionId, out var clientId))
+            {
+                Console.WriteLine($"[GameHub.ProposeDiscard] Setting clientId {clientId} WantsDiscard={wantsDiscard}");
+                _roomMaster.SetPlayerDiscardState(clientId, wantsDiscard);
+            }
+            else
+            {
+                Console.WriteLine($"[GameHub.ProposeDiscard] ERROR: ConnectionId {Context.ConnectionId} not found in mapping!");
+            }
+        }
+
+        // Notifica tutti i client dell'aggiornamento
+        await Clients.All.SendAsync("UpdatePlayers");
+    }
+
+    public async Task<bool> IsDiscardAllowed()
+    {
+        return await Task.FromResult(_roomMaster.DiscardAllowed);
     }
 }
 

@@ -24,6 +24,9 @@ namespace WebBoggler.SignalRServer.Models
         public bool IsReady { get; set; }
 
         [DataMember]
+        public bool WantsDiscard { get; set; }
+
+        [DataMember]
         public int Rank { get; set; }
 
         [DataMember]

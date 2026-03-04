@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/WebBoggler/WebBoggler/__BoardGrid.xaml
+/WebBoggler/WebBoggler.SignalRServer/_last_working_2016/RoomMaster.vb

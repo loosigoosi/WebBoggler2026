@@ -34,7 +34,7 @@
                             <!-- Prima riga: Nickname e TextBox -->
                             <StackPanel x:Name="spLogin" Orientation="Horizontal" VerticalAlignment ="Center" HorizontalAlignment="Right" Visibility="Visible" Margin="0,0,0,3">
                                 <TextBox Foreground="#FFE0E0E0" Text="Nickname: " Margin="0,0,5,0" FontSize="12" BorderThickness="0" TextAlignment="Right" Background="#00E0E0E0" Width="80" Height="25" VerticalContentAlignment="Center"/>
-                                <TextBox x:Name="txtUserName" Foreground="#FF101010" Background="#FFE0E0E0" Width="100" Height="25" KeyDown="txtUserName_KeyDown"/>
+                                <TextBox x:Name="txtUserName" Foreground="#FFFFFFFF" Background="#FF404040" BorderBrush="#FF808080" BorderThickness="2" Width="100" Height="25" KeyDown="txtUserName_KeyDown" PlaceholderText="nickname" VerticalScrollBarVisibility="Disabled" Cursor="IBeam"/>
                                 <!-- Pulsante Join quando NON sei loggato -->
                                 <Button x:Name="cmdJoin" IsEnabled="False" Width="90" Height="25" Margin="10,0,0,0" FontSize="14" Content="Partecipa" HorizontalContentAlignment="Center" Tag="Join" />
                             </StackPanel>
@@ -44,7 +44,7 @@
                                           HorizontalAlignment="Right" Margin="0,0,10,0" 
                                           Foreground="#FFEAAA00" FontSize="11" 
                                           VerticalContentAlignment="Center" 
-                                          Checked="chkReady_Checked" Unchecked="chkReady_Unchecked"/>
+                                          Checked="chkReady_Checked" Unchecked="chkReady_Unchecked" AllowScrollOnTouchMove="False"/>
                                 <Button x:Name="cmdLeave" Width="90" Height="25" FontSize="14" Content="Abbandona" HorizontalContentAlignment="Center" Click="CmdJoin_Click" />
                             </StackPanel>
                         </StackPanel>
@@ -62,7 +62,7 @@
                                     <DataTemplate>
                                         <Border BorderThickness="1" Height="25" BorderBrush="#FF303030" VerticalAlignment="Center" Margin="1,1,1,0">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Background="#00000000">
-                                                <!-- NickName - colore iniziale rosso, aggiornato via code-behind -->
+                                                <!-- NickName con [✓] o [ ] per indicare ready status -->
                                                 <TextBlock Text="{Binding NickName}" 
                                                            Cursor="Hand" Margin=" 1,1,0,0" 
                                                            Foreground="#FFC80000"
@@ -128,8 +128,8 @@
                                         <Button x:Name="cmdClearWord" Width="40" Height="30" Margin="0,5,0,0" Content="X" FontSize="20" Padding="0,-5" Background="#FFA08080" Foreground="#FFB01010" FontWeight="Bold" HorizontalAlignment="Right"/>
                                         <Button x:Name="cmdAddWord" IsEnabled="False" Width="100" Margin="0,5,0,0" Height="30" Content="Aggiungi >" Tag="Aggiungi >" FontSize=" 14" FontWeight="Bold" HorizontalAlignment="Right" Background="#FF808080" Foreground="#FF007500"/>
                                     </StackPanel>
-                                    <StackPanel x:Name="panGameStatus" Visibility="Visible" Orientation="Vertical" HorizontalAlignment="Center">
-                                        <TextBlock x:Name="txtGameSubStatus" HorizontalAlignment="Center" Width="230" Height="18" Margin="0,5,0,0" Text="" Padding="0,5,0,0" Foreground="#FFEAAA00" FontSize=" 12" TextAlignment ="Center"  /><!--Background="#00EEEEEE"-->
+                                    <StackPanel x:Name="panGameStatus" Visibility="Visible" Orientation="Vertical" HorizontalAlignment="Center" Width="389" Height="25" Margin="0,16,0,0">
+                                        <TextBlock x:Name="txtGameSubStatus" HorizontalAlignment="Center" Width="379" Height="15" Margin="0,0,0,0" Text="" Padding="0,0,0,0" Foreground="#FFEAAA00" FontSize=" 12" TextAlignment ="Center"  /><!--Background="#00EEEEEE"-->
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
