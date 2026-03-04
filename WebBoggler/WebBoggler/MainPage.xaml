@@ -62,12 +62,13 @@
                                     <DataTemplate>
                                         <Border BorderThickness="1" Height="25" BorderBrush="#FF303030" VerticalAlignment="Center" Margin="1,1,1,0">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Background="#00000000">
+                                                <!-- NickName - colore iniziale rosso, aggiornato via code-behind -->
                                                 <TextBlock Text="{Binding NickName}" 
                                                            Cursor="Hand" Margin=" 1,1,0,0" 
-                                                           Foreground="{Binding IsReady, Converter={StaticResource ReadyToColorConverter}}" 
-                                                           FontWeight="{Binding IsReady, Converter={StaticResource ReadyToFontWeightConverter}}"
-                                                           Width="115" Height="30" FontSize="14" TextAlignment ="Left" /><!--Background="#00000000"-->
-                                                <TextBlock Text="{Binding Score}" Cursor="Hand" Margin=" 1,1,2,0" Foreground="#FFA0A0F0" Width="20" Height="30" FontSize="14" FontWeight="Bold" TextAlignment ="Right" /><!--Background="#0000000"-->
+                                                           Foreground="#FFC80000"
+                                                           Width="115" Height="30" FontSize="14" TextAlignment ="Left" />
+                                                <!-- Score sempre blu -->
+                                                <TextBlock Text="{Binding Score}" Cursor="Hand" Margin=" 1,1,2,0" Foreground="#FFA0A0F0" Width="20" Height="30" FontSize="14" FontWeight="Bold" TextAlignment ="Right" />
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>

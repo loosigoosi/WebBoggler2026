@@ -199,6 +199,7 @@ Public Class RoomMaster
         wbBoard.GameSerial = _gameSerial
         _distributionBoard = wbBoard
 
+
         ''Scrivo il seriale della board in web.config
         Dim myConfiguration As Configuration = WebConfigurationManager.OpenWebConfiguration("~")
         myConfiguration.AppSettings.Settings("BoardsServedCount").Value = _gameSerial.ToString

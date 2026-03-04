@@ -10,4 +10,10 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="BigBoggler">
+      <HintPath>..\WebBogglerService\libs\BigBoggler.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

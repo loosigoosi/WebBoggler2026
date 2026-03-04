@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+BigBoggler
+</name>
+</assembly>
+<members>
+<member name="T:BigBoggler_Common.WPConstants">
+ <summary>
+ Class to define a few constants used in this demo (for event codes, properties, etc).
+ </summary>
+ <remarks>
+ These values are something made up for this particular demo! 
+ You can define other values (and more) in your games, as needed.
+ </remarks>
+</member>
+<member name="F:BigBoggler_Common.WPConstants.EvColor">
+ <summary>(1) Event defining a color of a player.</summary>
+</member>
+<member name="F:BigBoggler_Common.WPConstants.EvPosition">
+ <summary>(2) Event defining the position of a player.</summary>
+</member>
+<member name="F:BigBoggler_Common.WPConstants.GridSizeProp">
+ <summary>("s") Property grid size currently used in this room.</summary>
+</member>
+<member name="F:BigBoggler_Common.WPConstants.MapProp">
+ <summary>("m") Property map (map / level / scene) currently used in this room.</summary>
+</member>
+<member name="T:BigBoggler_Common.WPConstants.MapType">
+ <summary>Types available as map / level / scene.</summary>
+</member>
+</members>
+</doc>

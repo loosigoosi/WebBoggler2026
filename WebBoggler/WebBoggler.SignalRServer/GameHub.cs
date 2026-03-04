@@ -99,7 +99,7 @@ public class GameHub : Hub
     public async Task<Board> GetBoard(string localeID)
     {
         var board = _roomMaster.Board;
-        if (board == null)
+        if (board is null)
         {
             board = new Board
             {
@@ -167,7 +167,8 @@ public class GameHub : Hub
 
     public async Task<bool> CheckWord(string word)
     {
-        return await Task.FromResult(true);
+        // Usa il Lexicon di RoomMaster per validare la parola
+        return await Task.FromResult(_roomMaster.CheckWord(word));
     }
 
     public async Task SendWordList(WordList wordList, string clientID)
@@ -184,7 +185,11 @@ public class GameHub : Hub
 
     public async Task<WordList> GetSolution()
     {
-        var solution = _roomMaster.GetSolution() ?? new WordList { Items = Array.Empty<Word>() };
+        var solution = _roomMaster.GetSolution();
+        if (solution == null)
+        {
+            solution = new WordList { Items = Array.Empty<Word>() };
+        }
         return await Task.FromResult(solution);
     }
 }

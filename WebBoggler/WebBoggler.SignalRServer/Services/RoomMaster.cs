@@ -1,17 +1,17 @@
 using System.Collections.Concurrent;
 using System.Timers;
 using Microsoft.AspNetCore.SignalR;
-using WebBoggler.SignalRServer.Models;
 using Timer = System.Timers.Timer;
+using BigBoggler_Common; // Per Board con Shake()
+using DtoModels = WebBoggler.SignalRServer.Models; // Alias per i DTO
 
 namespace WebBoggler.SignalRServer.Services;
 
 public class RoomMaster
 {
-    private readonly ConcurrentDictionary<string, Player> _roomPlayers = new();
-    private Board? _board;
-    private Board? _distributionBoard;
-    private WordList? _solutionWordList;
+    private readonly ConcurrentDictionary<string, DtoModels.Player> _roomPlayers = new(); // Semplice: uso DTO
+    private BigBoggler_Common.Board? _board; // Il VERO board con Shake()
+    private DtoModels.Board? _distributionBoard; // DTO per il client
     private static long _gameSerial = 0;
 
     private readonly object _syncObject = new();
@@ -61,7 +61,8 @@ public class RoomMaster
         _hubContext = hubContext;
         _gameSerial = startingBoardSerial;
 
-        _board = CreateBoard("it-IT");
+        // Crea il primo board usando BigBoggler con Shake()
+        _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
         _board.Shake();
         StoreDistributionBoard();
 
@@ -85,40 +86,49 @@ public class RoomMaster
     }
 
     public RoomMasterState State => _state;
-    public Board? Board => _distributionBoard;
+    public DtoModels.Board? Board => _distributionBoard;
     public int RoundDurationMS => GAME_ROUND_DURATION_MS;
     public int DeadTimeAmountMS => GAME_PRE_VALIDATION_INTERVAL_MS + GAME_SHOWTIME_PAUSE_MS + GAME_PRE_START_DELAY;
     public DateTime RoundStartTimeUTC => _roundStartTimeUTC;
 
-    public Players GetRoomPlayers(string clientID)
+    public DtoModels.Players GetRoomPlayers(string clientID)
     {
-        var playersList = new List<Player>();
+        var playersList = new List<DtoModels.Player>();
 
         foreach (var ply in _roomPlayers.Values)
         {
-            var newPlayer = new Player
+            // Rimuovi TUTTI gli asterischi dal nickname
+            string baseNickname = ply.NickName.TrimStart('*');
+
+            // Aggiungi asterisco se IsReady
+            string displayName = ply.IsReady 
+                ? "*" + baseNickname 
+                : baseNickname;
+
+            var newPlayer = new DtoModels.Player
             {
                 ID = ply.ID,
-                NickName = ply.NickName,
+                NickName = displayName,
                 Score = ply.Score,
                 WordList = ply.WordList,
-                IsLocal = ply.ID == clientID
+                IsLocal = ply.ID == clientID,
+                IsReady = ply.IsReady
             };
             playersList.Add(newPlayer);
         }
 
-        return new Players { Items = playersList.ToArray() };
+        return new DtoModels.Players { Items = playersList.ToArray() };
     }
 
     public bool AddRoundPlayer(string playerID, string name, int gameScore = 0, long rank = 0)
     {
-        var player = new Player
+        var player = new DtoModels.Player
         {
             ID = playerID,
             NickName = name,
             Score = gameScore,
             IsReady = false,
-            WordList = new WordList { Items = Array.Empty<Word>() }
+            WordList = new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() }
         };
 
         return _roomPlayers.TryAdd(playerID, player);
@@ -129,12 +139,19 @@ public class RoomMaster
         _roomPlayers.TryRemove(playerID, out _);
     }
 
-    public WordList? GetSolution()
+    public DtoModels.WordList? GetSolution()
     {
-        return _solutionWordList;
+        // Per ora ritorna lista vuota - implementeremo dopo
+        return new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() };
     }
 
-    public void AddWordList(WordList wordList, string playerID)
+    public bool CheckWord(string word)
+    {
+        // Per ora accetta tutte le parole - implementeremo dopo
+        return true;
+    }
+
+    public void AddWordList(DtoModels.WordList wordList, string playerID)
     {
         if (_roomPlayers.TryGetValue(playerID, out var player))
         {
@@ -168,43 +185,41 @@ public class RoomMaster
         }
     }
 
-    private Board CreateBoard(string localeID)
-    {
-        var board = new Board
-        {
-            LocaleID = localeID,
-            DicesVector = new Dice[25],
-            GameSerial = _gameSerial
-        };
-
-        var random = new Random();
-        string[] letters = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "Qu", "R", "S", "T", "U", "V", "Z" };
-
-        for (int i = 0; i < 25; i++)
-        {
-            board.DicesVector[i] = new Dice
-            {
-                Index = i,
-                Letter = letters[random.Next(letters.Length)],
-                Rotation = random.Next(4) * 90,
-                Row = i / 5,
-                Column = i % 5
-            };
-        }
-
-        return board;
-    }
-
     private void StoreDistributionBoard()
     {
         if (_board == null) return;
 
         _gameSerial++;
-        _board.GameSerial = _gameSerial;
 
-        _solutionWordList = new WordList { Items = Array.Empty<Word>() };
+        // Converte il board BigBoggler in DTO per il client
+        var dtoBoard = new DtoModels.Board
+        {
+            LocaleID = _board.LocaleID,
+            GameSerial = _gameSerial,
+            WordCount = 0 // Per ora 0, calcoleremo dopo con Solve()
+        };
 
-        _distributionBoard = _board;
+        // Converte i dadi - DiceArray è una PROPERTY indexer in BigBoggler
+        var dices = new List<DtoModels.Dice>();
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                var bigBogDice = _board.DiceArray[i, j]; // Usa indexer []
+                var dice = new DtoModels.Dice
+                {
+                    Letter = bigBogDice.SelectedString,
+                    Rotation = bigBogDice.FaceRotation,
+                    Index = i * 5 + j,
+                    Row = i,
+                    Column = j
+                };
+                dices.Add(dice);
+            }
+        }
+        dtoBoard.DicesVector = dices.ToArray();
+
+        _distributionBoard = dtoBoard;
     }
 
     private void CheckPlayers()
@@ -215,7 +230,8 @@ public class RoomMaster
             {
                 _state = RoomMasterState.SendingBoard;
 
-                _board = CreateBoard("it-IT");
+                // Crea nuovo board usando BigBoggler
+                _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
                 _board.Shake();
                 StoreDistributionBoard();
 
@@ -271,6 +287,7 @@ public class RoomMaster
 
     private void MarkDuplicatedWords()
     {
+        // Implementazione semplificata - confronto testo parole
         try
         {
             foreach (var player1 in _roomPlayers.Values)
@@ -279,20 +296,18 @@ public class RoomMaster
 
                 foreach (var word1 in player1.WordList.Items)
                 {
-                    if (word1 == null) continue; // Skip null words
-
+                    if (word1 == null) continue;
                     word1.Duplicated = false;
+
+                    var wordText1 = GetWordText(word1);
+                    if (string.IsNullOrEmpty(wordText1)) continue;
 
                     foreach (var player2 in _roomPlayers.Values)
                     {
                         if (player2.ID == player1.ID) continue;
                         if (player2.WordList?.Items == null) continue;
 
-                        var wordText1 = GetWordText(word1);
-                        if (string.IsNullOrEmpty(wordText1)) continue; // Skip invalid words
-
                         var found = player2.WordList.Items.Any(w => w != null && GetWordText(w) == wordText1);
-
                         if (found)
                         {
                             word1.Duplicated = true;
@@ -308,32 +323,23 @@ public class RoomMaster
         }
     }
 
-    private string GetWordText(Word word)
+    private string GetWordText(DtoModels.Word word)
     {
-        if (word.DicePath == null || word.DicePath.Count == 0) 
+        if (word.DicePath == null || word.DicePath.Count == 0)
             return string.Empty;
 
-        try
-        {
-            // Filtra eventuali null nel DicePath prima di fare il join
-            return string.Join("", word.DicePath.Where(d => d != null).Select(d => d.Letter ?? ""));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in GetWordText: {ex.Message}");
-            return string.Empty;
-        }
+        return string.Join("", word.DicePath.Where(d => d != null).Select(d => d.Letter ?? ""));
     }
 
     private void UpdateScores()
     {
+        // Implementazione semplificata - punteggio base per lunghezza
         try
         {
             foreach (var player in _roomPlayers.Values)
             {
                 if (player.WordList?.Items == null) continue;
 
-                // Filtra parole null e duplicati
                 var wordsList = player.WordList.Items
                     .Where(w => w != null && !w.Duplicated)
                     .ToList();
@@ -342,7 +348,7 @@ public class RoomMaster
                 int score = 0;
                 foreach (var word in player.WordList.Items)
                 {
-                    if (word == null) continue; // Safety check
+                    if (word == null) continue;
 
                     var length = word.DicePath?.Count ?? 0;
                     score += length switch
@@ -360,7 +366,7 @@ public class RoomMaster
                 player.Score += score;
             }
 
-            _ = Task.Run(async () => 
+            _ = Task.Run(async () =>
             {
                 if (ScoreChange != null)
                     await ScoreChange.Invoke();

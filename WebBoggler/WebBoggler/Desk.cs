@@ -750,7 +750,7 @@ namespace WebBoggler
 							}
 						}
 
-						// Forza il refresh della ListBox riassegnando ItemsSource
+						// Aggiorna ItemsSource della ListBox
 						_playersListControl.ItemsSource = null;
 						_playersListControl.ItemsSource = _Players;
 
