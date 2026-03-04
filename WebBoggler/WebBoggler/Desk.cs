@@ -166,7 +166,14 @@ namespace WebBoggler
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("SignalR connect error: " + ex.Message);
+                string errorMessage = "Impossibile connettersi al server di gioco.\n\n";
+                errorMessage += "Verifica che il server SignalR sia in esecuzione su:\n";
+                errorMessage += "http://localhost:5170\n\n";
+                errorMessage += "Per avviare il server, esegui:\n";
+                errorMessage += "dotnet run --project WebBoggler.SignalRServer\n\n";
+                errorMessage += "Dettagli errore: " + ex.Message;
+
+                System.Windows.MessageBox.Show(errorMessage, "Errore Connessione Server", MessageBoxButton.OK);
             }
         }
 

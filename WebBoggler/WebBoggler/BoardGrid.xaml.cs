@@ -11,23 +11,30 @@ using WebBogglerCommonTypes;
 namespace WebBoggler
 {
 
-    public sealed partial class BoardGrid : UserControl
-    {
-        private Rectangle _rectSelector;
+	public sealed partial class BoardGrid : UserControl
+	{
+		private Rectangle _rectSelector;
 
-        // Costruttore
-        public BoardGrid()
-        {
-            this.InitializeComponent();
+		// Costruttore
+		public BoardGrid()
+		{
+			this.InitializeComponent();
+			this.Loaded += BoardGrid_Loaded;
+		}
 
-            for (int i = 1; i <= 25; i++)
+		private void BoardGrid_Loaded(object sender, RoutedEventArgs e)
+		{
+			for (int i = 1; i <= 25; i++)
 			{
-				Rectangle rectButton =  (Rectangle)base.FindName("recButton" + i.ToString());
-                rectButton.Tapped += lblLetter_Tapped;
-                rectButton.MouseEnter += rectButton_PointerEntered;
-                rectButton.MouseLeave += rectButton_PointerExited; 
+				Rectangle rectButton = (Rectangle)base.FindName("recButton" + i.ToString());
+				if (rectButton != null)
+				{
+					rectButton.MouseEnter += rectButton_PointerEntered;
+					rectButton.MouseLeave += rectButton_PointerExited;
+					rectButton.MouseLeftButtonDown += rectButton_MouseLeftButtonDown;
+					rectButton_PointerExited(rectButton, null);
+				}
 			}
-
 		}
 
         internal void HideCover()
@@ -85,73 +92,69 @@ namespace WebBoggler
         }
 
 
-        internal void DrawWordPaths(Word word)
-        {
-            SolidColorBrush brush = new SolidColorBrush();
-            SolidColorBrush brush2 = new SolidColorBrush();
-            Color color = new Color
+		internal void DrawWordPaths(Word word)
+		{
+			SolidColorBrush brush1 = new SolidColorBrush();
+			SolidColorBrush brush2 = new SolidColorBrush();
+
+			// Verdino come nel VB
+			Color color1 = new Color
 			{ 
-                R = 255,
-                G = 230,
-                B = 70,
-                A = 255
-            };
-            brush.Color = color;
-            brush.Opacity = 0.65;
-            double scaleX = this.cnvWordPaths.ActualWidth / 5.0;
-            double scaleY = this.cnvWordPaths.ActualHeight / 5.0;
-            string[] item = word.GetGridPathPolyline(scaleX, scaleY, new Point(scaleX / 2.0, scaleY / 2.0));
-            this.ClearPaths();
-            Path path = new Path
-            {
-                Stroke = brush,
-                StrokeThickness = 8,
-                StrokeEndLineCap = PenLineCap.Round,
-                StrokeLineJoin = PenLineJoin.Round,
-                StrokeStartLineCap = PenLineCap.Round,
-                Fill = null
-            };
-            PathFigure figure = new PathFigure();
-			////figure.Segments = new PathSegmentCollection();
-			////figure.Segments.Add(item);
-			////PathGeometry geometry = new PathGeometry();
-			////geometry.Figures = new PathFigureCollection();
-			////geometry.Figures.Add(figure);
-			////path.Data = geometry;
-			
-			path.Data = (Geometry)DotNetForHtml5.Core.TypeFromStringConverters.ConvertFromInvariantString(typeof(Geometry), item[0]);
-            this.cnvWordPaths.Children.Add(path);
+				R = 187,
+				G = 214,
+				B = 10,
+				A = 255
+			};
+			brush1.Color = color1;
+			brush1.Opacity = 0.85;
 
-            //Disegna cerchietto di inizio parola
-            color = new Color
-            {
-                R = 0255,
-                G =230,
-                B = 70,
-                A = 255
-            };
+			double rectWidth = this.cnvWordPaths.ActualWidth / 5.0;
+			double rectHeight = this.cnvWordPaths.ActualHeight / 5.0;
 
-            brush2.Color = color;
-            brush2.Opacity = 0.75;
-            var ellipse = new Ellipse();
-            ellipse.StrokeThickness = 3.0;
-            ellipse.Stroke = brush2;
-            ellipse.Fill = brush2;
-            ellipse.Height = 35.0;
-            ellipse.Width = 35.0;
-            ellipse.Visibility = Visibility.Collapsed;
+			Polyline ply = word.GetPolyline(rectWidth, rectHeight, new Point(rectWidth / 2.0, rectHeight / 2.0));
 
-            Point p = new Point(double.Parse(item[1].Split(",".ToCharArray())[0]), double.Parse(item[1].Split(",".ToCharArray())[1]));
-            var t= new TranslateTransform();
-            t.X = p.X - (ellipse.Width / 2.0);
-            t.Y = p.Y - (ellipse.Height / 2.0);
+			this.ClearPaths();
 
-            this.cnvWordPaths.Children.Add(ellipse);
+			if (ply != null)
+			{
+				// Linea continua come nel VB
+				ply.Stroke = brush1;
+				ply.StrokeThickness = 19;
+				ply.StrokeEndLineCap = PenLineCap.Round;
+				ply.StrokeLineJoin = PenLineJoin.Round;
+				ply.StrokeStartLineCap = PenLineCap.Round;
+				ply.StrokeDashCap = PenLineCap.Round;
+				ply.Fill = null;
 
-            ellipse.RenderTransform = t;
-            ellipse.Visibility = Visibility.Visible;
-            //
-        }
+				this.cnvWordPaths.Children.Add(ply);
+
+				// Cerchietto iniziale
+				Color color2 = new Color
+				{
+					R = 187,
+					G = 214,
+					B = 10,
+					A = 255
+				};
+				brush2.Color = color2;
+				brush2.Opacity = 0.95;
+
+				Ellipse circ = new Ellipse();
+				circ.StrokeThickness = 3.0;
+				circ.Stroke = brush2;
+				circ.Fill = brush2;
+				circ.Height = 50.0;
+				circ.Width = 50.0;
+				circ.Margin = new Thickness(
+					ply.Points[0].X - circ.Width / 2.0, 
+					ply.Points[0].Y - circ.Height / 2.0, 
+					0, 
+					0
+				);
+
+				this.cnvWordPaths.Children.Add(circ);
+			}
+		}
 
         #endregion
 
@@ -222,6 +225,17 @@ namespace WebBoggler
             brush.Opacity = 0.75;
 
             ((Rectangle)sender).Stroke = brush;
+        }
+
+        private void rectButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            int index = int.Parse(((Rectangle)sender).Name.Substring(9));
+            TextBlock letter = (TextBlock)base.FindName("lblLetter" + index.ToString());
+
+            if (LetterTapped != null)
+            {
+                LetterTapped(sender, index);
+            }
         }
 
 
