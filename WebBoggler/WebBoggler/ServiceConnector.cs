@@ -1,108 +1,332 @@
 ﻿using System;
-using System.Net.WebSockets;
 using System.ServiceModel;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace WebBoggler
 {
-    class ServiceConnector
-    {
+	class ServiceConnector
+	{
 
-        ////website
-        //private const string WCFSERVICE_URL = @"http://webboggler.xidea.it/gameserver/ServiceWebBoggler.svc";
-        //private const string WEBSOCKETSERVICE_URL = @"ws://webboggler.xidea.it/gameserver/ServiceWebSocket.svc";
+		////website
+		//private const string WCFSERVICE_URL = @"http://webboggler.xidea.it/gameserver/ServiceWebBoggler.svc";
+		//private const string SIGNALR_HUB_URL = @"http://webboggler.xidea.it/gamehub";
 
-        ////website dev
-        //private const string WCFSERVICE_URL = @"http://webbogglerdev.xidea.it/gameserver/ServiceWebBoggler.svc";
-        //private const string WEBSOCKETSERVICE_URL = @"ws://webbogglerdev.xidea.it/gameserver/ServiceWebSocket.svc";
+		////website dev
+		//private const string WCFSERVICE_URL = @"http://webbogglerdev.xidea.it/gameserver/ServiceWebBoggler.svc";
+		//private const string SIGNALR_HUB_URL = @"http://webbogglerdev.xidea.it/gamehub";
 
-        //local
-        private const string WCFSERVICE_URL = @"http://localhost:8733/gameserver/ServiceWebBoggler.svc";
-        private const string WEBSOCKETSERVICE_URL = @"ws://localhost:8733/gameserver/ServiceWebSocket.svc";
+		//local
+		private const string WCFSERVICE_URL = @"http://localhost:8733/gameserver/ServiceWebBoggler.svc";
+		private const string SIGNALR_HUB_URL = @"http://localhost:5170/gamehub";
 
-        ////localIIS
-        //private const string WCFSERVICE_URL = @"http://localhost/ServiceWebBoggler.svc";
-        //private const string WEBSOCKETSERVICE_URL = @"ws://localhost/ServiceWebSocket.svc";
+		////localIIS
+		//private const string WCFSERVICE_URL = @"http://localhost/ServiceWebBoggler.svc";
+		//private const string SIGNALR_HUB_URL = @"http://localhost/gamehub";
 
-        internal WebBogglerServer.ServiceWebBogglerClient ConnectService()
-        {
+		internal WebBogglerServer.ServiceWebBogglerClient ConnectService()
+		{
 
-            var binding = new BasicHttpBinding();
-            binding.MaxReceivedMessageSize = 512000; //WordList di soluzione è più largo del default di 64535
-            var  client = new WebBogglerServer.ServiceWebBogglerClient (binding, new EndpointAddress(new Uri(WCFSERVICE_URL)));
-            
+			var binding = new BasicHttpBinding();
+			binding.MaxReceivedMessageSize = 512000; //WordList di soluzione è più largo del default di 64535
+			var  client = new WebBogglerServer.ServiceWebBogglerClient (binding, new EndpointAddress(new Uri(WCFSERVICE_URL)));
+
 
 			return client; 
-        }
+		}
 
-        internal CSHTML5.Extensions.WebSockets.WebSocket ConnectWebSocket()
-        {
-            var webSocket = new CSHTML5.Extensions.WebSockets.WebSocket();
-            var serviceUri = new Uri(WEBSOCKETSERVICE_URL);
-            // fire-and-forget (backwards compatible)
-            webSocket.ConnectAsync(serviceUri, new System.Threading.CancellationToken());
-            return webSocket;
-        }
+		internal async Task<SignalRGameClient> ConnectSignalRAsync(CancellationToken cancellationToken = default)
+		{
+			var client = new SignalRGameClient();
+			await client.ConnectAsync(SIGNALR_HUB_URL, cancellationToken);
+			return client;
+		}
 
-        // Async connect that will await the underlying ConnectAsync on the shim and
-        // return the connected websocket instance. Caller can await this to ensure
-        // connection is established before registering handlers.
-        internal async Task<CSHTML5.Extensions.WebSockets.ClientWebSocket> ConnectWebSocketAsync(CancellationToken cancellationToken = default)
-        {
-            var webSocket = new CSHTML5.Extensions.WebSockets.ClientWebSocket();
-            var serviceUri = new Uri(WEBSOCKETSERVICE_URL);
-            await webSocket.ConnectAsync(serviceUri, cancellationToken).ConfigureAwait(false);
-            return webSocket;
-        }
+	}
 
-    }
-    public class MyWebSocketClient
-    {
-        private System.Net.WebSockets.ClientWebSocket _socket;
-        private CancellationTokenSource _cts;
+	public class SignalRGameClient
+	{
+		private HubConnection? _connection;
+		private readonly SynchronizationContext? _syncContext;
 
-        // Ecco i tuoi vecchi eventi!
-        public event Action<string> OnMessageReceived;
-        public event Action OnConnected;
-        public event Action<string> OnError;
+		// Events compatible with the old WebSocket shim
+		public event EventHandler? OnOpen;
+		public event EventHandler<MessageEventArgs>? OnMessage;
+		public event EventHandler? OnClose;
+		public event EventHandler<ErrorEventArgs>? OnError;
 
-        public async Task ConnectAsync(string url)
-        {
-            _socket = new System.Net.WebSockets.ClientWebSocket();
-            _cts = new CancellationTokenSource();
+		public SignalRGameClient()
+		{
+			_syncContext = SynchronizationContext.Current;
+		}
 
-            try
-            {
-                await _socket.ConnectAsync(new Uri(url), _cts.Token);
-                OnConnected?.Invoke(); // Scatena l'evento di connessione
+		public async Task ConnectAsync(string hubUrl, CancellationToken cancellationToken = default)
+		{
+			try
+			{
+				_connection = new HubConnectionBuilder()
+					.WithUrl(hubUrl)
+					.WithAutomaticReconnect()
+					.Build();
 
-                // Fai partire il loop di ascolto in background
-                _ = ReceiveLoop();
-            }
-            catch (Exception ex) { OnError?.Invoke(ex.Message); }
-        }
+				// Register server-to-client message handlers
+				_connection.On<string>("Message", (message) =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = message }));
+				});
 
-        private async Task ReceiveLoop()
-        {
-            var buffer = new byte[1024 * 4];
-            while (_socket.State == System.Net.WebSockets.WebSocketState.Open)
-            {
-                var result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
-                if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    // Ecco il tuo vecchio OnMessage!
-                    OnMessageReceived?.Invoke(message);
-                }
-            }
-        }
+				_connection.On("Registered", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "REGISTERED" }));
+				});
 
-        public async Task SendAsync(string message)
-        {
-            var bytes = Encoding.UTF8.GetBytes(message);
-            await _socket.SendAsync(new ArraySegment<byte>(bytes), System.Net.WebSockets.WebSocketMessageType.Text, true, _cts.Token);
-        }
-    }
+				_connection.On<string>("ClientId", (clientId) =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = clientId }));
+				});
+
+				_connection.On("GetBoard", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "GET_BOARD" }));
+				});
+
+				_connection.On("StartRound", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "START_ROUND" }));
+				});
+
+				_connection.On("EndRound", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "END_ROUND" }));
+				});
+
+				_connection.On("ShowTime", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "SHOW_TIME" }));
+				});
+
+				_connection.On("UpdatePlayers", () =>
+				{
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "UPDATE_PLAYERS" }));
+				});
+
+				_connection.Closed += async (error) =>
+				{
+					PostInvoke(() => OnClose?.Invoke(this, EventArgs.Empty));
+					await Task.CompletedTask;
+				};
+
+				await _connection.StartAsync(cancellationToken);
+				PostInvoke(() => OnOpen?.Invoke(this, EventArgs.Empty));
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				throw;
+			}
+		}
+
+		private void PostInvoke(Action action)
+		{
+			if (_syncContext != null)
+			{
+				try { _syncContext.Post(_ => action(), null); }
+				catch { action(); }
+			}
+			else
+			{
+				try { action(); } catch { }
+			}
+		}
+
+		// Send methods (Client-to-Server)
+		public void Send(string message)
+		{
+			_ = SendAsync(message);
+		}
+
+		public async Task SendAsync(string message)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return;
+
+			try
+			{
+				switch (message.ToUpper())
+				{
+					case "REGISTER":
+						await _connection.InvokeAsync("Register");
+						break;
+					case "REMOVE":
+						await _connection.InvokeAsync("Remove");
+						break;
+					case "READY":
+						await _connection.InvokeAsync("Ready");
+						break;
+					case "NOTREADY":
+						await _connection.InvokeAsync("NotReady");
+						break;
+					default:
+						await _connection.InvokeAsync("Echo", message);
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+			}
+		}
+
+		public async Task DisconnectAsync()
+		{
+			if (_connection != null)
+			{
+				await _connection.StopAsync();
+				await _connection.DisposeAsync();
+			}
+		}
+
+		// Game logic methods (typed SignalR calls)
+		public async Task<WebBogglerServer.Board?> GetBoardAsync(string localeID)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return null;
+
+			try
+			{
+				// Call the SignalR hub method and map the response to the WCF proxy type
+				var board = await _connection.InvokeAsync<WebBogglerServer.Board>("GetBoard", localeID);
+				return board;
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return null;
+			}
+		}
+
+		public async Task<WebBogglerServer.GameInfo?> ObserveAsync()
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return null;
+
+			try
+			{
+				var gameInfo = await _connection.InvokeAsync<WebBogglerServer.GameInfo>("Observe");
+				return gameInfo;
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return null;
+			}
+		}
+
+		public async Task<bool> JoinAsync(string clientID, string userName)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return false;
+
+			try
+			{
+				return await _connection.InvokeAsync<bool>("Join", clientID, userName);
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return false;
+			}
+		}
+
+		public async Task<bool> LeaveAsync(string clientID)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return false;
+
+			try
+			{
+				return await _connection.InvokeAsync<bool>("Leave", clientID);
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return false;
+			}
+		}
+
+		public async Task<bool> CheckWordAsync(string word)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return false;
+
+			try
+			{
+				return await _connection.InvokeAsync<bool>("CheckWord", word);
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return false;
+			}
+		}
+
+		public async Task SendWordListAsync(WebBogglerServer.WordList wordList, string clientID)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return;
+
+			try
+			{
+				await _connection.InvokeAsync("SendWordList", wordList, clientID);
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+			}
+		}
+
+		public async Task<WebBogglerServer.Players?> GetPlayersAsync(string clientID)
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return null;
+
+			try
+			{
+				return await _connection.InvokeAsync<WebBogglerServer.Players>("GetPlayers", clientID);
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return null;
+			}
+		}
+
+		public async Task<WebBogglerServer.WordList?> GetSolutionAsync()
+		{
+			if (_connection == null || _connection.State != HubConnectionState.Connected)
+				return null;
+
+			try
+			{
+				return await _connection.InvokeAsync<WebBogglerServer.WordList>("GetSolution");
+			}
+			catch (Exception ex)
+			{
+				PostInvoke(() => OnError?.Invoke(this, new ErrorEventArgs { Message = ex.Message }));
+				return null;
+			}
+		}
+	}
+
+	// Event args compatible with the old WebSocket shim
+	public class MessageEventArgs : EventArgs
+	{
+		public object? Data { get; set; }
+	}
+
+	public class ErrorEventArgs : EventArgs
+	{
+		public string Message { get; set; } = string.Empty;
+	}
 }

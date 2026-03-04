@@ -14,11 +14,10 @@ using WebBogglerCommonTypes;
 namespace WebBoggler
 
 {
-    class Desk
-    {
+	class Desk
+	{
 
-        private WebBogglerServer.ServiceWebBogglerClient _serviceClient;
-		public CSHTML5.Extensions.WebSockets.ClientWebSocket _WebSocket;
+		public SignalRGameClient _WebSocket;
 
         private DispatcherTimer _oneSecondTicker = new DispatcherTimer() { Interval = new TimeSpan(0, 0, 1) };
 
@@ -97,13 +96,11 @@ namespace WebBoggler
             _loginPanel = loginPanel;
             _userNameTextBox = userNameTextBox;
             _boardGrid = boardGrid;
-            _boardGrid.IsEnabled = false;
-            _Hourglass = hourglass;
-
-            ServiceConnector service = new ServiceConnector();
-            _serviceClient = service.ConnectService ();
+			_boardGrid.IsEnabled = false;
+			_Hourglass = hourglass;
 
 			// Initialize websocket asynchronously and register handlers after connection
+			ServiceConnector service = new ServiceConnector();
 			_ = InitializeWebSocketAsync(service);
 
             _Hourglass.Duration = new TimeSpan(0,0,0,0, _roundDurationMS);
@@ -158,7 +155,7 @@ namespace WebBoggler
         {
             try
             {
-                var ws = await service.ConnectWebSocketAsync();
+                var ws = await service.ConnectSignalRAsync();
                 _WebSocket = ws;
                 if (_WebSocket != null)
                 {
@@ -169,26 +166,31 @@ namespace WebBoggler
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("WebSocket connect error: " + ex.Message);
+                System.Windows.MessageBox.Show("SignalR connect error: " + ex.Message);
             }
         }
 
         internal void Echo(string msg)
         { if (_WebSocket != null) _WebSocket.Send(msg);}
 
-        internal void Register()
+		internal async Task RegisterAsync()
 		{
-            try
-            {
-                if (_WebSocket == null)
-                {
-                    ServiceConnector service = new ServiceConnector();
-                    _WebSocket = service.ConnectWebSocket();
-                    ConnectWebSocket();
-                }
-                if (_WebSocket != null) _WebSocket.Send("REGISTER"); //Il server assegna l'ID, lo reinvia con tag #
-            }
-            finally { }
+			try
+			{
+				if (_WebSocket == null)
+				{
+					ServiceConnector service = new ServiceConnector();
+					_WebSocket = await service.ConnectSignalRAsync();
+					ConnectWebSocket();
+				}
+				if (_WebSocket != null) _WebSocket.Send("REGISTER"); //Il server assegna l'ID, lo reinvia con tag #
+			}
+			finally { }
+		}
+
+		internal void Register()
+		{
+			_ = RegisterAsync();
 		}
 
         internal async Task Join(string userName)
@@ -196,14 +198,18 @@ namespace WebBoggler
             _localPlayer.NickName = userName;
             try
             {
-                var joinResp = await _serviceClient.JoinAsync(_localPlayer.ID, "*" + _localPlayer.NickName + "." + _localPlayer.ID.Substring(0, 3));
                 var result = false;
-                try { result = joinResp.Body.JoinResult; } catch { result = false; }
+                if (_WebSocket != null)
+                {
+                    result = await _WebSocket.JoinAsync(_localPlayer.ID, "*" + _localPlayer.NickName + "." + _localPlayer.ID.Substring(0, 3));
+                }
 
                 if (result)
                 {
-                    var obsResp = await _serviceClient.ObserveAsync();
-                    _gameInfo = obsResp.Body.ObserveResult;
+                    if (_WebSocket != null)
+                    {
+                        _gameInfo = await _WebSocket.ObserveAsync();    
+                    }
 
                     if (_gameInfo != null && _gameInfo.RoomState == "RunningRound")
                 {
@@ -238,11 +244,12 @@ namespace WebBoggler
         {
             try
             {
-                var resp = await _serviceClient.LeaveAsync(_localPlayer.ID);
                 var result = false;
+                if (_WebSocket != null)
+                {
+                    result = await _WebSocket.LeaveAsync(_localPlayer.ID);
+                }
 
-                try { result = resp.Body.LeaveResult; } catch { result = false; }
-                
                 if (result)
                 {
                     _wordEntry.Clear();
@@ -271,25 +278,14 @@ namespace WebBoggler
 
         internal async Task GetBoardFromServerAsync(string localeID)
         {
-
-
-            //test
-            var commObj = (System.ServiceModel.ICommunicationObject)_serviceClient;
-            if (commObj.State == System.ServiceModel.CommunicationState.Faulted)
-            {
-                System.Windows.MessageBox.Show("Service client is in Faulted state.");
-                // opzionale: ricrea il client: _serviceClient = new ServiceConnector().ConnectService();
-            }
-
-
-
-
-
             try
             {
-                var resp = await _serviceClient.GetBoardAsync(localeID);
-                var board = resp.Body.GetBoardResult;
-                _board = (Board)board;
+                if (_WebSocket != null)
+                {
+                    var board = await _WebSocket.GetBoardAsync(localeID);
+                    if (board != null)
+                        _board = (Board)board;
+                }
             }
             catch( Exception ex) { System.Windows.MessageBox.Show(ex.Message); }
 
@@ -307,8 +303,11 @@ namespace WebBoggler
         {
             try
             {
-                var resp = await _serviceClient.CheckWordAsync(text);
-                return resp.Body.CheckWordResult;
+                if (_WebSocket != null)
+                {
+                    return await _WebSocket.CheckWordAsync(text);
+                }
+                return false;
             }
             catch (Exception ex)
             {
@@ -344,32 +343,24 @@ namespace WebBoggler
         {
             _Mode = DeskMode.Observing; 
 
-            GetBoardFromServerAsync("it-IT");
+            await GetBoardFromServerAsync("it-IT");
 
             try
             {
-                var obsResp = await _serviceClient.ObserveAsync();
-                _gameInfo = obsResp.Body.ObserveResult;
+                if (_WebSocket != null)
+                {
+                    _gameInfo = await _WebSocket.ObserveAsync();
+                }
             }
-            /*catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show("Observe error: " + ex.Message);
-            }*/
-            catch (System.ServiceModel.FaultException fe)
-            {
-                            System.Windows.MessageBox.Show("FaultException:\n" + fe.ToString());
-                        }
-            catch (System.ServiceModel.CommunicationException ce)
-            {
-                            System.Windows.MessageBox.Show("CommunicationException:\n" + ce.ToString());
-                        }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Observe error:\n" + ex.ToString());
             }
 
-
-            _gameStatusText.Text = "Turno di gioco #" + (_board.GameSerial).ToString().Trim();
+            if (_board != null)
+            {
+                _gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim();
+            }
 
             _Players = await UpdatePlayers();
             _playersListControl.ItemsSource = _Players;
@@ -378,17 +369,18 @@ namespace WebBoggler
             _Hourglass.ShowCover();
             _boardGrid.ShowCover();
 
-            //var startTimeOffset = TimeSpan.FromMilliseconds(_gameInfo.RoundElapsedTimeMS);
-            _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime().AddMilliseconds( (double) (- _gameInfo.RoundElapsedTimeMS));
-
-            _oneSecondTicker.Start(); //va posto qui altrimenti legge gameInfo ancora nullo
-
-            // _Hourglass.StartTimeUTC = _gameInfo.RoundStartTime;
-            if (_gameInfo.RoomState == "RunningRound")
+            if (_gameInfo != null)
             {
-                _Hourglass.Reset();
-                _Hourglass.Run();
                 _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime().AddMilliseconds( (double) (- _gameInfo.RoundElapsedTimeMS));
+
+                _oneSecondTicker.Start();
+
+                if (_gameInfo.RoomState == "RunningRound")
+                {
+                    _Hourglass.Reset();
+                    _Hourglass.Run();
+                    _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime().AddMilliseconds( (double) (- _gameInfo.RoundElapsedTimeMS));
+                }
             }
         }
 
@@ -397,18 +389,25 @@ namespace WebBoggler
             // Rely on the implicit conversion operator between local WordList and proxy WordList
             try
             {
-                await _serviceClient.SendWordListAsync(_wordList, _localPlayer.ID);
+                if (_WebSocket != null)
+                {
+                    await _WebSocket.SendWordListAsync(_wordList, _localPlayer.ID);
+                }
             }
             catch { }
         }
 
         private async Task<Players> UpdatePlayers()
         {
-            Players plys;
+            Players plys = null;
             try
             {
-                var resp = await _serviceClient.GetPlayersAsync(_localPlayer.ID);
-                plys = (Players)(resp.Body.GetPlayersResult);
+                if (_WebSocket != null)
+                {
+                    var resp = await _WebSocket.GetPlayersAsync(_localPlayer.ID);
+                    if (resp != null)
+                        plys = (Players)resp;
+                }
             }
             catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message);  return null;}
 
@@ -418,11 +417,15 @@ namespace WebBoggler
 
         private async Task<WordList> GetSolution()
         {
-            WordList sol;
+            WordList sol = null;
             try
             {
-                var resp = await _serviceClient.GetSolutionAsync();
-                sol = (WordList)resp.Body.GetSolutionResult;
+                if (_WebSocket != null)
+                {
+                    var resp = await _WebSocket.GetSolutionAsync();
+                    if (resp != null)
+                        sol = (WordList)resp;
+                }
             }
             catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message); return null; }
 
@@ -484,6 +487,8 @@ namespace WebBoggler
 
         private void _OneSecondTicker_Tick(object sender, object e)
         {
+            if (_gameInfo == null) return;
+
             var delayMS = _gameInfo.DeadTimeAmountMS + _gameInfo.RoundDurationMS - (int)((DateTime.Now.ToUniversalTime() - _Hourglass.StartTimeUTC).TotalMilliseconds);
             if (delayMS < 0) delayMS = 0;
             var delay = TimeSpan.FromMilliseconds(delayMS);             
@@ -578,9 +583,9 @@ namespace WebBoggler
             Register(); 
 		}
 
-		private async void _WebSocket_OnMessage(object sender, CSHTML5.Extensions.WebSockets.OnMessageEventArgs e)
+		private async void _WebSocket_OnMessage(object sender, MessageEventArgs e)
 		{
-            var msg = (e.Data.ToString().ToUpper());
+			var msg = (e.Data.ToString().ToUpper());
             if(msg.Substring(0,1) == "#") //Alla richiesta di registrazione il server invia il client ID assegnato preceduto da #
             {
                 //Lo memorizzo e in seguito lo uso per il Join
@@ -593,30 +598,32 @@ namespace WebBoggler
             {
                 switch (msg)
 			    {
-				    case "GET_BOARD":
-                        _gameStatusText.Text = "Sorteggio nuovo turno...";
-                        _boardGrid.IsEnabled = false;
-					    _boardGrid.ShowCover();
-                        _Hourglass.ShowCover();
+					case "GET_BOARD":
+						_gameStatusText.Text = "Sorteggio nuovo turno...";
+						_boardGrid.IsEnabled = false;
+						_boardGrid.ShowCover();
+						_Hourglass.ShowCover();
 
-                        if (_Mode == DeskMode.Playing || _Mode == DeskMode.Observing )
-                        {
-                            _playersWordListPanel.Visibility = Visibility.Collapsed;
-                            _localWordListPanel.Visibility = Visibility.Visible;
-                            _solutionControl.SelectionChanged -= _solutionControl_SelectionChanged;
-                            _playersWordListControl.SelectionChanged -= _playersWordListControl_SelectionChanged;
-                            _Hourglass.Visibility = Visibility.Visible;
-                            _wordList = new WordList();
-                            _wordListControl.ItemsSource = _wordList;
-					    }
+						if (_Mode == DeskMode.Playing || _Mode == DeskMode.Observing )
+						{
+							_playersWordListPanel.Visibility = Visibility.Collapsed;
+							_localWordListPanel.Visibility = Visibility.Visible;
+							_solutionControl.SelectionChanged -= _solutionControl_SelectionChanged;
+							_playersWordListControl.SelectionChanged -= _playersWordListControl_SelectionChanged;
+							_Hourglass.Visibility = Visibility.Visible;
+							_wordList = new WordList();
+							_wordListControl.ItemsSource = _wordList;
+						}
 
-                        _soundFX.PlaySound(Sound.ShakeBoard);
-                        this.GetBoardFromServerAsync("it-IT");
-                        
-                        if (_board != null)
-                        {_gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim() ; }
+						_soundFX.PlaySound(Sound.ShakeBoard);
+						await GetBoardFromServerAsync("it-IT");
 
-                        break;
+						if (_board != null)
+						{
+							_gameStatusText.Text = "Turno di gioco #" + _board.GameSerial.ToString().Trim();
+						}
+
+						break;
 
 				    case "START_ROUND":
 
@@ -714,9 +721,9 @@ namespace WebBoggler
             }
 		}
 
-		private void _WebSocket_OnError(object sender, CSHTML5.Extensions.WebSockets.OnErrorEventArgs e)
+		private void _WebSocket_OnError(object sender, ErrorEventArgs e)
 		{
-			System.Windows.MessageBox.Show("WebSocket Error!");
+			System.Windows.MessageBox.Show("SignalR Error: " + e.Message);
 		}
 
 		private void _WebSocket_OnClose(object sender, EventArgs e)

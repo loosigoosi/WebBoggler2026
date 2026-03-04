@@ -2,18 +2,20 @@
 namespace WebBogglerCommonTypes
 {
 	public partial class Player
-    {
-        private string _ID; //ID del giocatore
-        private string _nickName;
-        private int _rank; //Posizione in classifica
-        private int _roundScore; //Punteggio del round in corso
-        private int _record; //Record di round
-        private int _totalRoundPlayed; //Numero totale di round giocati
-        private int _totalWinningRound; //Totale vittorie
-        private double _winPercent; //Percentuale vittorie 
-        private bool _isLocal; //Giocatore locale
-        private bool _isGuest; //Guest player
-        private WordList _wordList;
+	{
+		private string _ID; //ID del giocatore
+		private string _nickName;
+		private int _rank; //Posizione in classifica
+		private int _roundScore; //Punteggio del round in corso
+		private int _record; //Record di round
+		private int _totalRoundPlayed; //Numero totale di round giocati
+		private int _totalWinningRound; //Totale vittorie
+		private double _winPercent; //Percentuale vittorie 
+		private bool _isLocal; //Giocatore locale
+		private bool _isGuest; //Guest player
+		private bool _isReady; //Giocatore pronto per iniziare
+		private int _totalWordsCount; //Totale parole trovate
+		private WordList _wordList;
 		
 		public string ID 
         {   get { return _ID; }
@@ -61,14 +63,24 @@ namespace WebBogglerCommonTypes
         }
 		
 		public bool IsGuest 
-        {   get { return _isGuest; }
-            set { _isGuest = value; }
-        }
+		{   get { return _isGuest; }
+			set { _isGuest = value; }
+		}
+
+		public bool IsReady 
+		{   get { return _isReady; }
+			set { _isReady = value; }
+		}
+
+		public int TotalWordsCount 
+		{   get { return _totalWordsCount; }
+			set { _totalWordsCount = value; }
+		}
 
 		internal WordList WordList 
-        {   get { return _wordList; }
-            set { _wordList = value; }
-        }
+		{   get { return _wordList; }
+			set { _wordList = value; }
+		}
 
 
     }

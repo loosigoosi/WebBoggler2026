@@ -9,17 +9,19 @@ namespace WebBogglerCommonTypes
 {
 	[DataContract(IsReference = true, Namespace = "WebBogglerCommonTypes")]
 	public class Player
-    {
-        private string _ID; //ID del giocatore
-        private string _nickName;
-        private int _rank; //Posizione in classifica
-        private int _roundScore; //Punteggio del round in corso
-        private int _record; //Record di round
-        private int _totalRoundPlayed; //Numero totale di round giocati
-        private int _totalWinningRound; //Totale vittorie
-        private double _winPercent; //Percentuale vittorie 
-        private bool _isLocal; //Giocatore locale
-        private bool _isGuest; //Guest player
+	{
+		private string _ID; //ID del giocatore
+		private string _nickName;
+		private int _rank; //Posizione in classifica
+		private int _roundScore; //Punteggio del round in corso
+		private int _record; //Record di round
+		private int _totalRoundPlayed; //Numero totale di round giocati
+		private int _totalWinningRound; //Totale vittorie
+		private double _winPercent; //Percentuale vittorie 
+		private bool _isLocal; //Giocatore locale
+		private bool _isGuest; //Guest player
+		private bool _isReady; //Giocatore pronto per iniziare
+		private int _totalWordsCount; //Totale parole trovate
 
 		[DataMember]
 		public string ID 
@@ -66,10 +68,20 @@ namespace WebBogglerCommonTypes
         {   get { return _isLocal; }
             set { _isLocal = value; }
         }
-		[DataMember]
-		public bool IsGuest 
-        {   get { return _isGuest; }
-            set { _isGuest = value; }
-        } 
-    }
-}
+			[DataMember]
+			public bool IsGuest 
+			{   get { return _isGuest; }
+				set { _isGuest = value; }
+			}
+			[DataMember]
+			public bool IsReady 
+			{   get { return _isReady; }
+				set { _isReady = value; }
+			}
+			[DataMember]
+			public int TotalWordsCount 
+			{   get { return _totalWordsCount; }
+				set { _totalWordsCount = value; }
+			}
+			}
+		}

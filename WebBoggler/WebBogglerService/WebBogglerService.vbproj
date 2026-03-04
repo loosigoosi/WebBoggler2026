@@ -183,11 +183,9 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54057</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-<<<<<<< HEAD
-          <IISUrl>http://localhost:8733/gameserver</IISUrl>
-=======
+
           <IISUrl>http://localhost:5733/</IISUrl>
->>>>>>> Stato di fatto dopo interventi Copilot. Ancora non funzionante.Versione lavorata su Mac con Copilot
+
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

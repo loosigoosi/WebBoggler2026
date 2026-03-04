@@ -71,26 +71,32 @@ namespace WebBogglerCommonTypes
 
 	public partial class Players
 	{
-        public static implicit operator Players(WebBogglerServer.Players mo)
-        {
-            if (mo == null) return null;
+		public static implicit operator Players(WebBogglerServer.Players mo)
+		{
+			if (mo == null) return null;
 
-            var p = new Players();
+			var p = new Players();
 
-            foreach (WebBogglerServer.Player item in mo.Items)
-            {
-                var pl = new Player();
-                pl.IsGuest = item.IsGuest ;
-                pl.ID = item.ID;    
-                pl.TotalRoundPlayed = item.TotalRoundPlayed ;
-                pl.TotalWinningRound = item.TotalWinningRound;
-                pl.WinPercent = item.WinPercent ;
-                pl.IsLocal = item.IsLocal;
-                p.Add(pl);
-            }
+			foreach (WebBogglerServer.Player item in mo.Items)
+			{
+				var pl = new Player();
+				pl.ID = item.ID;
+				pl.NickName = item.NickName;
+				pl.Score = item.Score;
+				pl.IsGuest = item.IsGuest;
+				pl.IsLocal = item.IsLocal;
+				pl.IsReady = item.IsReady;
+				pl.Rank = item.Rank;
+				pl.Record = item.Record;
+				pl.TotalRoundPlayed = item.TotalRoundPlayed;
+				pl.TotalWinningRound = item.TotalWinningRound;
+				pl.WinPercent = item.WinPercent;
+				pl.TotalWordsCount = item.TotalWordsCount;
+				p.Add(pl);
+			}
 
-            return p;
-        }
+			return p;
+		}
 	}
 
     public partial class Word :WordBase
