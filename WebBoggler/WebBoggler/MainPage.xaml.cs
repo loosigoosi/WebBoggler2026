@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls;
 using WebBogglerCommonTypes;
+using System.Windows.Input;
 
 namespace WebBoggler
 {
@@ -40,7 +41,9 @@ namespace WebBoggler
             this.chkSounds.Checked += ChkSounds_Checked;
             this.chkReady.Checked += chkReady_Checked;
             this.chkReady.Unchecked += chkReady_Unchecked;
-		}
+            this.lbSolution.MouseDoubleClick  += LbSolution_MouseDoubleClick;
+        }
+
 
         #region "Event Handlers"
 
@@ -48,6 +51,7 @@ namespace WebBoggler
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             _Desk.Register();
+            
         }
 
 
@@ -59,7 +63,7 @@ namespace WebBoggler
             }
             else
             {
-                _Desk.LeaveAsync();
+                sfxSoundPlayer.PlaySound(Sound.Failure);
             }
         }
 
@@ -88,11 +92,13 @@ namespace WebBoggler
                 cmdAddWord.Content = cmdAddWord.Tag.ToString();
                 _Desk.AddEntryToWordList();
                 _Desk.WordEntry.Clear();
+                sfxSoundPlayer.PlaySound(Sound.AddWord);
             }
             else
             {
                 cmdAddWord.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 200, 0, 0)); //red
                 cmdAddWord.Content = "Non valida";
+                sfxSoundPlayer.PlaySound(Sound.Failure);
             }
 
         }
@@ -147,8 +153,15 @@ namespace WebBoggler
 				_Desk._WebSocket?.Send("NOTREADY");
 			}
 
-			#endregion
-	}
+        private void LbSolution_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // Richiede al server la lista delle parole soluzioni e le visualizza in lbSolution. 
+            _Desk.GetSolution();
+        }
+
+
+        #endregion
+    }
 
 }
 

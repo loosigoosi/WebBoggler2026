@@ -346,7 +346,7 @@ namespace WebBoggler
 
         internal void AddEntryToWordList()
         {
-            _soundFX.PlaySound(Sound.AddWord);
+            //_soundFX.PlaySound(Sound.AddWord); // spostato su MainPage insieme al relativo suono fail dopo la validazione parola server side.
             _wordList.Add(_wordEntry.Clone());
 
            _wordListControl.ItemsSource = _wordList;
@@ -481,7 +481,7 @@ namespace WebBoggler
             return plys;
         }
 
-        private async Task<WordList> GetSolution()
+        internal async Task<WordList> GetSolution()
         {
             WordList sol = null;
             try

@@ -54,7 +54,7 @@ public class RoomMaster
 
     private static DateTime _roundStartTimeUTC;
     private RoomMasterState _state = RoomMasterState.Ready;
-    private BigBoggler_Common.Lexicon _lexicon = new BigBoggler_Common.Lexicon("it_IT");
+    private BigBoggler_Common.Lexicon _lexicon = new BigBoggler_Common.Lexicon("it-IT");
     private bool _discardAllowed = false;
     public enum RoomMasterState
     {
@@ -232,10 +232,13 @@ public class RoomMaster
         }
     }
 
-    public bool CheckWord(string word)
+    public bool CheckWord(string wordString)
     {
         // Per ora accetta tutte le parole - implementeremo dopo
-        return true;
+        // return true;
+
+        return _lexicon.Validate(wordString); // Non è che ci fosse granché da pensare, badòla!
+         
     }
 
 //    WORDLIST CONVERSION TO DO old VB version.\\
