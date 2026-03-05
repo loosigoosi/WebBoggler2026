@@ -41,6 +41,7 @@ namespace WebBoggler
         private ListBox _playersListControl;
         private Button _cmdAddWord;
         private Button _cmdJoin;
+        private Button _cmdLeave;
         private CheckBox _chkReady;
         private StackPanel _readyPanel;
         private SoundFX _soundFX;
@@ -74,7 +75,7 @@ namespace WebBoggler
                     Button addWordButton, ListBox wordListControl,
                     StackPanel playersWordListPanel, StackPanel localWordListPanel, ListBox playersWordListControl, ListBox solutionControl,
                     ListBox playersListControl, StackPanel loginPanel, TextBox userNameTextBox,
-                    Button cmdJoin, CheckBox chkReady, StackPanel readyPanel, SoundFX soundFXControl)
+                    Button cmdJoin, Button cmdLeave, CheckBox chkReady, StackPanel readyPanel, SoundFX soundFXControl)
         {
             _gameControlsPanel = gameControlsPanel;
             _gameStatusPanel = gameStatusPanel;
@@ -102,7 +103,7 @@ namespace WebBoggler
             _boardGrid = boardGrid;
 			_boardGrid.IsEnabled = false;
 			_Hourglass = hourglass;
-
+            _cmdLeave =cmdLeave;
 			// Initialize websocket asynchronously and register handlers after connection
 			ServiceConnector service = new ServiceConnector();
 			_ = InitializeWebSocketAsync(service);
@@ -220,27 +221,31 @@ namespace WebBoggler
                 {
                     if (_WebSocket != null)
                     {
-                        _gameInfo = await _WebSocket.ObserveAsync();    
+                        _gameInfo = await _WebSocket.ObserveAsync();
+                        _cmdLeave.IsEnabled = true;
+                        _cmdJoin.IsEnabled = false;
+
                     }
 
                     if (_gameInfo != null && _gameInfo.RoomState == "RunningRound")
-                {
-                    _gameControlsPanel.Visibility = Visibility.Visible;
-                    _gameStatusPanel.Visibility = Visibility.Collapsed;
-                    _boardGrid.HideCover();
-                    _boardGrid.IsEnabled = true;
-                    _Hourglass.Visibility = Visibility.Visible;
-                    _Hourglass.HideCover();
-                    _Hourglass.Reset();
-                    _Hourglass.Run();
+                    {
+                        _gameControlsPanel.Visibility = Visibility.Visible;
+                        _gameStatusPanel.Visibility = Visibility.Collapsed;
+                        _boardGrid.HideCover();
+                        _boardGrid.IsEnabled = true;
+                        _Hourglass.Visibility = Visibility.Visible;
+                        _Hourglass.HideCover();
+                        _Hourglass.Reset();
+                        _Hourglass.Run();
                         var startTimeOffset = TimeSpan.FromMilliseconds(_gameInfo.RoundElapsedTimeMS);
                         _Hourglass.StartTimeUTC = DateTime.Now.ToUniversalTime() - startTimeOffset;
 
                         _wordFoundCountTextBlock.Visibility = Visibility.Visible;
                         _wordFoundCountTextBlock.Text = "Parole trovate: 0";
-                    }
-                    _Mode = DeskMode.Playing;
-                    _loginPanel.Visibility = Visibility.Collapsed;
+                        _Mode = DeskMode.Playing;
+                   }
+                         _loginPanel.Visibility = Visibility.Collapsed;
+                   
                     if (_readyPanel != null)
                     {
                         _readyPanel.Visibility = Visibility.Visible; // Mostra pannello "Sono pronto" + "Abbandona"
@@ -250,8 +255,8 @@ namespace WebBoggler
                         _chkReady.IsChecked = false; // Reset dello stato
                     }
                     _wordListControl.SelectionChanged += _wordListControl_SelectionChanged;
-                    _cmdJoin.Content = "Abbandona";
-                    _cmdJoin.Tag = "Leave";
+                    //_cmdJoin.Content = "Abbandona";
+                    //_cmdJoin.Tag = "Leave";
                 }
             }
             catch (Exception ex)
@@ -289,9 +294,10 @@ namespace WebBoggler
                     {
                         _chkReady.IsChecked = false; // Reset dello stato
                     }
-                    _cmdJoin.Content = "Partecipa";
+
+                    _userNameTextBox.Text =""; 
                     _cmdJoin.IsEnabled = false;
-                    _cmdJoin.Tag = "Join";
+                    _cmdLeave.IsEnabled = false;
                     _userNameTextBox.Text = "";
                     _loginPanel.Visibility = Visibility.Visible;
                     _wordListControl.SelectionChanged -= _wordListControl_SelectionChanged;
@@ -302,6 +308,8 @@ namespace WebBoggler
             {
                 System.Windows.MessageBox.Show("Leave error: " + ex.Message);
             }
+            _cmdJoin.IsEnabled = false; //DEVE restare false, perché attende tre caratteri nel txtbox per diventare clickabile
+            await UpdatePlayers();
         }
 
         internal async Task GetBoardFromServerAsync(string localeID)
@@ -678,7 +686,7 @@ namespace WebBoggler
             {
                 switch (msg)
 			    {
-					case "GET_BOARD":
+					case "BOARD_SERVED":
 						_gameStatusText.Text = "Sorteggio nuovo turno...";
 						_boardGrid.IsEnabled = false;
 						_boardGrid.ShowCover();
@@ -839,7 +847,7 @@ namespace WebBoggler
 			System.Windows.MessageBox.Show("SignalR Error: " + e.Message);
 		}
 
-		private void _WebSocket_OnClose(object sender, EventArgs e)
+		private async void _WebSocket_OnClose(object sender, EventArgs e)
 		{
 			_WebSocket = null;
 
@@ -850,9 +858,9 @@ namespace WebBoggler
 			errorMessage += "Server: " + serverUrl + "\n\n";
 			errorMessage += "Verifica che il server SignalR sia ancora in esecuzione e riavvia l'applicazione.";
 
-			System.Windows.MessageBox.Show(errorMessage, "Connessione Persa", MessageBoxButton.OK);
+			System.Windows.MessageBox.Show(errorMessage, "Connessione Chiusa", MessageBoxButton.OK);
 
-			LeaveAsync();  
+			await LeaveAsync();  
 			_localPlayer.ID = "-1";
 			_boardGrid.IsEnabled = false;
 

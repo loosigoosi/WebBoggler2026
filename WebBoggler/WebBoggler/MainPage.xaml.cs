@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Windows;
-
-using System.Windows.Media;
 using System.Windows.Controls;
-using WebBogglerCommonTypes;
 using System.Windows.Input;
+using System.Windows.Media;
+using WebBogglerCommonTypes;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebBoggler
 {
@@ -25,7 +28,7 @@ namespace WebBoggler
                             txtWordCount, txtFoundWordCount, txtInputWord, 
                             cmdAddWord, lbWordList, panPlayersWordList, panLocalWordList, lbPlayersWordList, lbSolution,   
                             lbPlayersList,spLogin, txtUserName,  
-                            cmdJoin, chkReady, spReadyPanel, sfxSoundPlayer);
+                            cmdJoin, cmdLeave, chkReady, spReadyPanel, sfxSoundPlayer);
 
             _cmdAddBrush = cmdAddWord.Foreground;
 
@@ -42,7 +45,10 @@ namespace WebBoggler
             this.chkReady.Checked += chkReady_Checked;
             this.chkReady.Unchecked += chkReady_Unchecked;
             this.lbSolution.MouseDoubleClick  += LbSolution_MouseDoubleClick;
+            this.cmdLeave.Click  += CmdLeave_MouseDoubleClick;
+
         }
+
 
 
         #region "Event Handlers"
@@ -57,16 +63,32 @@ namespace WebBoggler
 
         private async void CmdJoin_Click(object sender, RoutedEventArgs e)
         {
-            if ((cmdJoin.Tag).ToString() == "Join")
-            {
-                await _Desk.Join(txtUserName.Text);
-            }
-            else
-            {
-                sfxSoundPlayer.PlaySound(Sound.Failure);
-            }
+                await _Desk.Join(txtUserName.Text);             
         }
 
+
+/* Private Sub txtPlayerName_KeyUp(sender As Object, e As KeyEventArgs) Handles txtPlayerName.KeyUp
+
+        If e.Key = Key.Enter And CType(sender, TextBox).Text.Length >= 3 Then cmdLogIn_Click(sender, e)
+End Sub
+
+
+Private Sub txtPlayerName_TextChanged(sender As Object, e As TextChangedEventArgs) Handles txtPlayerName.TextChanged
+
+    cmdLogIn.IsEnabled = CType(sender, TextBox).Text.Length >= 3
+
+End Sub
+
+Private Sub cmdLogIn_Click(sender As Object, e As RoutedEventArgs) Handles cmdLogIn.Click
+
+    App.GameEngine = New GameEngine(5, App.Language)
+        App.GameEngine.PhotonClient.NickName = String.Format("{0,2:G2}.", (SupportClass.ThreadSafeRandom.Next() Mod 99)) & txtPlayerName.Text.Trim
+*/
+
+        private async void CmdLeave_MouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+            await _Desk.LeaveAsync();
+        }
 
         private void ChkSounds_Checked(object sender, RoutedEventArgs e)
         {

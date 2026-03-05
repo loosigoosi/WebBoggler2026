@@ -22,7 +22,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://localhost:55591",  // IIS Express
                 "http://localhost:55592",  // WebBoggler.Browser project
-                "http://localhost:8733")   // IIS local
+                "http://localhost:8733",   // IIS local
+                "http://webboggler.xidea.it:80") // WebBoggler hosted online
+
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -66,9 +68,9 @@ roomMaster.ValidatedResults += async () =>
 
 roomMaster.NewMatchKeepReady += async () =>
 {
-    Console.WriteLine("[Program.NewMatchKeepReady] Event fired, sending GetBoard to all clients...");
-    await hubContext.Clients.All.SendAsync("GetBoard");
-    Console.WriteLine("[Program.NewMatchKeepReady] GetBoard sent successfully");
+    Console.WriteLine("[Program.NewMatchKeepReady] Event fired, sending BoardServed to all clients...");
+    await hubContext.Clients.All.SendAsync("BoardServed");
+    Console.WriteLine("[Program.NewMatchKeepReady] BoardServed sent successfully");
 };
 
 roomMaster.ScoreChange += async () =>

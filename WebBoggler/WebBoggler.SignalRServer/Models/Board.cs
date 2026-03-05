@@ -17,7 +17,7 @@ namespace WebBoggler.SignalRServer.Models
         [DataMember]
         public long GameSerial { get; set; }
 
-        public void Shake()
+        /*public void Shake()
         {
             if (DicesVector == null) return;
 
@@ -29,6 +29,6 @@ namespace WebBoggler.SignalRServer.Models
                 DicesVector[i].Letter = letters[random.Next(letters.Length)];
                 DicesVector[i].Rotation = random.Next(4) * 90;
             }
-        }
+        }*/
     }
 }

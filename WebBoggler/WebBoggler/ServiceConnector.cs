@@ -89,9 +89,9 @@ namespace WebBoggler
 					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = clientId }));
 				});
 
-				_connection.On("GetBoard", () =>
+				_connection.On("BoardServed", () =>
 				{
-					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "GET_BOARD" }));
+					PostInvoke(() => OnMessage?.Invoke(this, new MessageEventArgs { Data = "BOARD_SERVED" }));
 				});
 
 				_connection.On("StartRound", () =>
