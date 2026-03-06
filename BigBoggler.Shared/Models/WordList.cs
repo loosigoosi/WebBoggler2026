@@ -1,11 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace BigBoggler.Models
 {
+    [DataContract]
     public class WordList : Dictionary<string, WordBase>
     {
+        // Per serializzazione SignalR: array di parole
+        [DataMember]
+        public WordBase[] Items
+        {
+            get => this.Values.ToArray();
+            set
+            {
+                this.Clear();
+                if (value != null)
+                {
+                    foreach (var word in value)
+                    {
+                        if (!string.IsNullOrEmpty(word.Text))
+                        {
+                            string key = word.Text.ToLower();
+                            if (!this.ContainsKey(key))
+                                this.Add(key, word);
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Calcola il punteggio totale della lista, filtrando o meno i duplicati.
         /// </summary>
@@ -31,7 +56,7 @@ namespace BigBoggler.Models
             foreach (var word in this.Values)
             {
                 // Trasforma il DicePath (LinkedList) in una stringa di coordinate "RC"
-                metadata.DicesArray[i] = string.Concat(word.DicePath.Select(d => $"{d.Row}{d.Column}"));
+                metadata.DicesArray[i] = string.Concat(word.DicePath.Select(d => string.Format("{0}{1}", d.Row, d.Column)));
                 metadata.DuplicatedPropertyArray[i] = word.Duplicated;
                 i++;
             }
@@ -45,7 +70,7 @@ namespace BigBoggler.Models
         public void SetMetadata(Board board, WordListMetadata metadata)
         {
             this.Clear();
-            if (metadata?.DicesArray == null) return;
+            if (metadata == null || metadata.DicesArray == null) return;
 
             for (int i = 0; i < metadata.DicesArray.Length; i++)
             {
@@ -78,3 +103,5 @@ namespace BigBoggler.Models
         }
     }
 }
+
+

@@ -1,4 +1,4 @@
-﻿namespace BigBoggler.Models
+﻿namespace BigBoggler
 {
     public enum PropertyCodes
     {

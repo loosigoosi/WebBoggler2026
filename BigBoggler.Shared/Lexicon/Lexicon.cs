@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace BigBoggler.Models
+namespace BigBoggler.Lexicon
 {
     public class Lexicon
     {

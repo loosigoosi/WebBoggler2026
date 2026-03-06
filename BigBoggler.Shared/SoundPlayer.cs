@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace BigBoggler.Models
+namespace BigBoggler.Media
 {
     public interface IWavPlayer
     {

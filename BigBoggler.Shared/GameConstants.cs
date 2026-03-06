@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace BigBoggler.Models
+namespace BigBoggler
 {
 
     // Vecchia classe per WP8, ora convertita in una classe statica per contenere le costanti del gioco

@@ -1,9 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using BigBoggler.Lexicon;
 
 namespace BigBoggler.Models
 {
+    [DataContract]
     public class Board
     {
         private readonly int _gridRank;
@@ -11,10 +14,55 @@ namespace BigBoggler.Models
         private readonly Dice[,] _diceArray;
         private readonly Random _randomizer = new Random();
 
+        [DataMember]
+        public string LocaleID { get; set; }
+
+        [DataMember]
+        public long GameSerial { get; set; }
+
+        [DataMember]
+        public int WordCount { get; set; }
+
+        // Proprietà per serializzazione SignalR
+        [DataMember]
+        public Dice[] DicesVector
+        {
+            get
+            {
+                var list = new List<Dice>();
+                for (int i = 0; i < _gridRank; i++)
+                    for (int j = 0; j < _gridRank; j++)
+                        if (_diceArray[i, j] != null)
+                            list.Add(_diceArray[i, j]);
+                return list.ToArray();
+            }
+            set
+            {
+                // Ricostruisce l'array 2D da quello serializzato
+                if (value != null)
+                {
+                    foreach (var dice in value)
+                    {
+                        if (dice.Row < _gridRank && dice.Column < _gridRank)
+                            _diceArray[dice.Row, dice.Column] = dice;
+                    }
+                }
+            }
+        }
+
+        // Proprietà non serializzate
+        public int GridRank => _gridRank;
+        public Dice[,] DiceArray => _diceArray;
+
+        public Board() : this(5)
+        {
+        }
+
         public Board(int gridRank)
         {
             _gridRank = gridRank;
             _diceArray = new Dice[gridRank, gridRank];
+            LocaleID = "it-IT";
         }
 
         // Metodo per aggiungere i dadi caricati dall'XML
@@ -28,15 +76,18 @@ namespace BigBoggler.Models
                 {
                     if (diceBag.Count == 0) break;
                     var d = diceBag[_randomizer.Next(0, diceBag.Count)];
-                    d.Randomize(); d.Row = i; d.Column = j;
+                    d.Randomize(); 
+                    d.Row = i; 
+                    d.Column = j;
                     _diceArray[i, j] = d;
                     diceBag.Remove(d);
                 }
         }
 
-        public Dice GetDiceAt(int r, int c) => (r >= 0 && r < _gridRank && c >= 0 && c < _gridRank) ? _diceArray[r, c] : null;
+        public Dice GetDiceAt(int r, int c) => 
+            (r >= 0 && r < _gridRank && c >= 0 && c < _gridRank) ? _diceArray[r, c] : null;
 
-        public WordList Solve(Lexicon lexicon)
+        public WordList Solve(Lexicon.Lexicon lexicon)
         {
             var results = new WordList();
             for (int r = 0; r < _gridRank; r++)
@@ -45,7 +96,7 @@ namespace BigBoggler.Models
             return results;
         }
 
-        private void SolveRecursive(Dice current, WordBase path, WordList results, Lexicon lexicon)
+        private void SolveRecursive(Dice current, WordBase path, WordList results, Lexicon.Lexicon lexicon)
         {
             if (path.Contains(current)) return;
             path.AppendDiceLast(current);
@@ -56,13 +107,15 @@ namespace BigBoggler.Models
             {
                 if (!lexicon.Words.ContainsKey(txt.Substring(0, lexicon.IndexLength)))
                 {
-                    path.RemoveDice(current); return;
+                    path.RemoveDice(current); 
+                    return;
                 }
             }
 
             if (txt.Length >= 4 && lexicon.Validate(txt))
             {
-                if (!results.ContainsKey(txt.ToLower())) results.Add(txt.ToLower(), path.Clone());
+                if (!results.ContainsKey(txt.ToLower())) 
+                    results.Add(txt.ToLower(), path.Clone());
             }
 
             for (int i = -1; i <= 1; i++)
