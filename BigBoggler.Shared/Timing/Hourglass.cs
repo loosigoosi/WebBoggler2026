@@ -4,17 +4,14 @@ using System.Timers;
 namespace BigBoggler.Timing
 {
     /// <summary>
-    /// Timer ad alta risoluzione per gestione countdown/stopwatch in scenari client e server.
-    /// Compatibile netstandard2.0, thread-safe per uso con SignalR e OpenSilver.
+    /// Timer base thread-safe per countdown/stopwatch.
+    /// Usabile sia in scenari server che client senza dipendenze UI.
     /// </summary>
     public class Hourglass : IDisposable
     {
-        /// <summary>
-        /// Argomenti evento per tick con informazioni sul tempo trascorso
-        /// </summary>
         public class HourglassTickEventArgs : EventArgs
         {
-            public TimeSpan ElapsedTime { get; }
+            public TimeSpan ElapsedTime { get; private set; }
 
             public HourglassTickEventArgs(TimeSpan elapsedTime)
             {
@@ -22,16 +19,16 @@ namespace BigBoggler.Timing
             }
         }
 
-        // ===== PRIVATE FIELDS =====
+        // ===== FIELDS =====
         private readonly Timer _internalTimer;
         private const int DEFAULT_TICK_INTERVAL_MS = 100;
         
-        private DateTime _startTime = DateTime.MinValue;
-        private DateTime _pauseTime = DateTime.MinValue;
-        private DateTime _lastSecondElapsed = DateTime.MinValue;
+        protected DateTime _startTime = DateTime.MinValue;
+        protected DateTime _pauseTime = DateTime.MinValue;
+        protected DateTime _lastSecondElapsed = DateTime.MinValue;
         
-        private readonly TimeSpan _oneSecondTimeSpan = new TimeSpan(0, 0, 1);
-        private readonly object _syncLock = new object();
+        protected readonly TimeSpan _oneSecondTimeSpan = new TimeSpan(0, 0, 1);
+        protected readonly object _syncLock = new object();
 
         private bool _perpetual;
         private TimeSpan _duration;
@@ -40,33 +37,28 @@ namespace BigBoggler.Timing
 
         // ===== CONSTRUCTOR =====
         
-        /// <summary>
-        /// Crea un nuovo Hourglass con durata predefinita di 1 minuto
-        /// </summary>
-        public Hourglass()
+        public Hourglass() : this(DEFAULT_TICK_INTERVAL_MS)
         {
-            _internalTimer = new Timer(DEFAULT_TICK_INTERVAL_MS);
+        }
+
+        protected Hourglass(int tickIntervalMs)
+        {
+            _internalTimer = new Timer(tickIntervalMs);
             _internalTimer.Elapsed += OnInternalTimerElapsed;
             _internalTimer.AutoReset = true;
             
-            _duration = TimeSpan.FromMinutes(1); // Default: 1 minuto
+            _duration = TimeSpan.FromMinutes(1);
         }
 
-        // ===== PUBLIC PROPERTIES =====
+        // ===== PROPERTIES =====
 
-        /// <summary>
-        /// Se true, il timer non si ferma mai alla scadenza
-        /// </summary>
         public bool Perpetual
         {
             get { lock (_syncLock) return _perpetual; }
             set { lock (_syncLock) _perpetual = value; }
         }
 
-        /// <summary>
-        /// Tempo trascorso dall'inizio o dalla ripresa
-        /// </summary>
-        public TimeSpan ElapsedTime
+        public virtual TimeSpan ElapsedTime
         {
             get
             {
@@ -88,9 +80,6 @@ namespace BigBoggler.Timing
             }
         }
 
-        /// <summary>
-        /// Percentuale di tempo trascorso (0-100)
-        /// </summary>
         public double ElapsedPercent
         {
             get
@@ -107,18 +96,12 @@ namespace BigBoggler.Timing
             }
         }
 
-        /// <summary>
-        /// Durata totale del countdown
-        /// </summary>
         public TimeSpan Duration
         {
             get { lock (_syncLock) return _duration; }
             set { lock (_syncLock) _duration = value; }
         }
 
-        /// <summary>
-        /// Tempo rimanente (Duration - ElapsedTime)
-        /// </summary>
         public TimeSpan RemainingTime
         {
             get
@@ -134,29 +117,20 @@ namespace BigBoggler.Timing
             }
         }
 
-        /// <summary>
-        /// Indica se il timer è attualmente in esecuzione
-        /// </summary>
         public bool IsRunning
         {
             get { lock (_syncLock) return _isRunning; }
         }
 
-        /// <summary>
-        /// Ora UTC di inizio (o ripresa dopo pausa)
-        /// </summary>
         public DateTime StartTimeUTC
         {
             get { lock (_syncLock) return _startTime; }
             set { lock (_syncLock) _startTime = value; }
         }
 
-        // ===== PUBLIC METHODS =====
+        // ===== METHODS =====
 
-        /// <summary>
-        /// Avvia il timer (o lo riprende dopo una pausa)
-        /// </summary>
-        public void Run()
+        public virtual void Run()
         {
             lock (_syncLock)
             {
@@ -165,13 +139,11 @@ namespace BigBoggler.Timing
 
                 if (_pauseTime == DateTime.MinValue)
                 {
-                    // Prima partenza
                     _startTime = DateTime.UtcNow;
                     _lastSecondElapsed = _startTime;
                 }
                 else
                 {
-                    // Ripresa da pausa: calcola nuovo start time
                     var pauseDuration = _pauseTime - _startTime;
                     _startTime = DateTime.UtcNow - pauseDuration;
                     _pauseTime = DateTime.MinValue;
@@ -182,10 +154,7 @@ namespace BigBoggler.Timing
             }
         }
 
-        /// <summary>
-        /// Mette in pausa il timer
-        /// </summary>
-        public void Pause()
+        public virtual void Pause()
         {
             lock (_syncLock)
             {
@@ -197,10 +166,7 @@ namespace BigBoggler.Timing
             }
         }
 
-        /// <summary>
-        /// Resetta il timer allo stato iniziale
-        /// </summary>
-        public void Reset()
+        public virtual void Reset()
         {
             lock (_syncLock)
             {
@@ -214,24 +180,13 @@ namespace BigBoggler.Timing
 
         // ===== EVENTS =====
 
-        /// <summary>
-        /// Evento sollevato ogni ~100ms mentre il timer è attivo
-        /// </summary>
         public event EventHandler<HourglassTickEventArgs> ElapsedTenth;
-
-        /// <summary>
-        /// Evento sollevato ogni secondo mentre il timer è attivo
-        /// </summary>
         public event EventHandler<HourglassTickEventArgs> ElapsedSecond;
-
-        /// <summary>
-        /// Evento sollevato quando la durata è scaduta (se Perpetual = false)
-        /// </summary>
         public event EventHandler TimeExpired;
 
-        // ===== PRIVATE METHODS =====
+        // ===== PROTECTED VIRTUAL METHODS =====
 
-        private void OnInternalTimerElapsed(object sender, ElapsedEventArgs e)
+        protected virtual void OnInternalTimerElapsed(object sender, ElapsedEventArgs e)
         {
             bool shouldFireExpired = false;
             bool shouldFireSecond = false;
@@ -245,7 +200,6 @@ namespace BigBoggler.Timing
                 var now = DateTime.UtcNow;
                 var elapsed = now - _startTime;
 
-                // Check scadenza
                 if (elapsed >= _duration && !_perpetual)
                 {
                     shouldFireExpired = true;
@@ -256,7 +210,6 @@ namespace BigBoggler.Timing
                 {
                     tickArgs = new HourglassTickEventArgs(elapsed);
 
-                    // Check se è passato un secondo
                     if ((now - _lastSecondElapsed) >= _oneSecondTimeSpan)
                     {
                         _lastSecondElapsed = now;
@@ -269,23 +222,23 @@ namespace BigBoggler.Timing
                 }
             }
 
-            // Invoca eventi fuori dal lock per evitare deadlock
+            RaiseEvents(shouldFireExpired, shouldFireSecond, shouldFireTenth, tickArgs);
+        }
+
+        protected virtual void RaiseEvents(bool fireExpired, bool fireSecond, bool fireTenth, HourglassTickEventArgs args)
+        {
             try
             {
-                if (shouldFireExpired)
+                if (fireExpired)
                 {
-                    TimeExpired?.Invoke(this, EventArgs.Empty);
+                    OnTimeExpired();
                 }
                 else
                 {
-                    if (shouldFireSecond)
-                    {
-                        ElapsedSecond?.Invoke(this, tickArgs);
-                    }
-                    if (shouldFireTenth)
-                    {
-                        ElapsedTenth?.Invoke(this, tickArgs);
-                    }
+                    if (fireSecond)
+                        OnElapsedSecond(args);
+                    if (fireTenth)
+                        OnElapsedTenth(args);
                 }
             }
             catch
@@ -294,7 +247,28 @@ namespace BigBoggler.Timing
             }
         }
 
-        // ===== DISPOSE PATTERN =====
+        protected virtual void OnTimeExpired()
+        {
+            var handler = TimeExpired;
+            if (handler != null)
+                handler(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnElapsedSecond(HourglassTickEventArgs e)
+        {
+            var handler = ElapsedSecond;
+            if (handler != null)
+                handler(this, e);
+        }
+
+        protected virtual void OnElapsedTenth(HourglassTickEventArgs e)
+        {
+            var handler = ElapsedTenth;
+            if (handler != null)
+                handler(this, e);
+        }
+
+        // ===== DISPOSE =====
 
         public void Dispose()
         {
@@ -310,9 +284,11 @@ namespace BigBoggler.Timing
             {
                 lock (_syncLock)
                 {
-                    _internalTimer?.Stop();
-                    _internalTimer?.Dispose();
-                    _disposed = true;
+                    if (_internalTimer != null)
+                    {
+                        _internalTimer.Stop();
+                        _internalTimer.Dispose();
+                    }
                 }
             }
 
@@ -324,4 +300,4 @@ namespace BigBoggler.Timing
             Dispose(false);
         }
     }
-}
+}                                                                                                   
