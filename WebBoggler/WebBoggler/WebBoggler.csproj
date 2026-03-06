@@ -4,17 +4,23 @@
     <TargetFramework>net10.0</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <DefineSilverlight>true</DefineSilverlight>
-    <!-- Configure Visual Studio to use local IIS for debugging by default -->
     <UseIIS>true</UseIIS>
     <IISUrl>http://localhost:8733/gameserver</IISUrl>
     <Title>WebBoggler</Title>
     <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.3" />
     <PackageReference Include="OpenSilver" Version="3.3.3" />
     <PackageReference Include="OpenSilver.Themes.Modern" Version="3.3.*" />
   </ItemGroup>
+  
+  <!-- SOLO BigBoggler.Shared -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\BigBoggler.Shared\BigBoggler.Shared.csproj" />
+  </ItemGroup>
+  
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -32,6 +38,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  
   <ItemGroup>
     <Compile Include="App.xaml.cs" />
     <Compile Include="Board.cs" />
@@ -41,9 +48,6 @@
     <Compile Include="Converters\PlayerReadyToColorConverter.cs" />
     <Compile Include="Converters\PlayerReadyToFontWeightConverter.cs" />
     <Compile Include="Desk.cs" />
-    <Compile Include="Dice.cs" />
-    <Compile Include="Dices.cs" />
-    <Compile Include="Hourglass.cs" />
     <Compile Include="HourglassControl.xaml.cs" />
     <Compile Include="MainPage.xaml.cs" />
     <Compile Include="Player.cs" />
@@ -54,22 +58,24 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ServiceConnector.cs" />
-    <Compile Include="ServiceTypesIntegrator.cs" />
+    <!-- RIMOSSO: ServiceTypesIntegrator.cs -->
     <Compile Include="SoundFX.xaml.cs" />
     <Compile Include="Word.cs" />
-    <Compile Include="WordBase.cs" />
     <Compile Include="WordList.cs" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.10.*" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" /> 
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="System.ServiceModel.Federation" Version="4.10.*" />
   </ItemGroup>
+  
   <ItemGroup>
     <UpToDateCheckInput Remove="Connected Services\**" />
   </ItemGroup>
+  
   <ItemGroup>
     <Content Include="Assets\Board.png" />
     <Content Include="Assets\Dice.png" />
@@ -92,10 +98,12 @@
     <Content Include="Connected Services\WebBogglerSockets\ConnectedService.json" />
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  
 </Project>

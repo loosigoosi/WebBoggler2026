@@ -25,6 +25,18 @@
       <None Include="Enums\GlobalEnums.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="Models\Board.cs" />
+    <Compile Include="Models\BoardMetaData.cs" />
+    <Compile Include="Models\Dice.cs" />
+    <Compile Include="Models\Dices.cs" />  <!-- AGGIUNGI QUESTA RIGA -->
+    <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\WordBase.cs" />
+    <Compile Include="Models\WordList.cs" />
+    <Compile Include="Models\WordListMetadata.cs" />
+    <!-- ... resto invariato -->
+  </ItemGroup>
+
   <!-- NON serve più: SDK include automaticamente tutti i .cs -->
   <!-- I file Timing\*.cs e Models\*.cs sono già inclusi automaticamente -->
 

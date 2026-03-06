@@ -3,19 +3,17 @@ using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Net.WebSockets;
-
-using WebBogglerCommonTypes;
+using BigBoggler.Models; // NUOVO
+using Dice = BigBoggler.Models.Dice; // Alias locale
 
 namespace WebBoggler
-
 {
-	class Desk
-	{
+    class Desk
+    {
 
 		public SignalRGameClient _WebSocket;
 

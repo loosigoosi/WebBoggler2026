@@ -10,6 +10,7 @@ namespace BigBoggler.Timing.Client
     public class ClientHourglass : Hourglass, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        private Action<TimeSpan> _onSecondElapsedCallback; // NUOVO
 
         public ClientHourglass() : base()
         {
@@ -17,9 +18,16 @@ namespace BigBoggler.Timing.Client
             ElapsedSecond += OnElapsedSecondInternal;
         }
 
+        // NUOVO: Metodo per registrare callback personalizzato
+        public void OnSecondElapsed(Action<TimeSpan> callback)
+        {
+            _onSecondElapsedCallback = callback;
+        }
+
         private void OnElapsedSecondInternal(object sender, HourglassTickEventArgs e)
         {
             NotifyPropertiesChanged();
+            _onSecondElapsedCallback?.Invoke(e.ElapsedTime); // NUOVO: Invoca callback se presente
         }
 
         // ===== PROPERTIES PER BINDING UI =====

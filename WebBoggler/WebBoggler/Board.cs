@@ -5,10 +5,11 @@ using System.Reflection;
 using System.IO;
 using System.Xml;
 using System.Runtime.Serialization;
+using BigBoggler.Models; // AGGIUNGI
 
-namespace WebBogglerCommonTypes
+namespace WebBoggler // CAMBIA da WebBogglerCommonTypes
 {
-	public partial class Board
+    public partial class Board
     {
 
         //>>> Board >>>>>>>>>>>>>>>>>>>>>>>
@@ -39,7 +40,7 @@ namespace WebBogglerCommonTypes
 
             if (targetWord.DicePath.Count > 0)
             {
-				Dices validDicesFirst = default(Dices);
+				Dices validDicesFirst = default(Dices); 
 				Dices validDicesLast = default(Dices);
 
                 Dice firstDice = targetWord.DicePath.First();

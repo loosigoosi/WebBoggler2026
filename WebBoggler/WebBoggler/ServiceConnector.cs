@@ -3,6 +3,7 @@ using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
+using BigBoggler.Models;
 
 namespace WebBoggler
 {
