@@ -1,46 +1,35 @@
-using BigBoggler_Common; // TEMPORANEO: Solo per Board.Shake() e Lexicon
-using BigBoggler.Models;  // NUOVO: Modelli unificati
-using BigBoggler.Timing.Server; // NUOVO: ServerHourglass
-using BigBoggler.Lexicon; // NUOVO: Lexicon service
+using BigBoggler.Models;
+using BigBoggler.Timing.Server;
+using BigBoggler.Lexicon;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Timers;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
-using DtoModels = WebBoggler.SignalRServer.Models; // Alias per i DTO
+using System.Linq;
 using Timer = System.Timers.Timer;
 #nullable disable
+
+//ALIAS - Solo per Board.Shake() legacy
+using SharedModels = BigBoggler.Models;
+
 
 namespace WebBoggler.SignalRServer.Services;
 
 public class RoomMaster
 {
-    // Usa BigBoggler.Models invece dei DTO locali
-    private readonly ConcurrentDictionary<string, DtoModels.Player> _roomPlayers = new();
-    
-    // TEMPORANEO: usa ancora BigBoggler_Common.Board per Shake()
-    private BigBoggler_Common.Board? _board;
-    
-    // Per distribuzione: convertiamo in BigBoggler.Models.Board
-    private DtoModels.Board? _distributionBoard;
-    
+    private readonly ConcurrentDictionary<string, SharedModels.Player> _roomPlayers = new();
+    private SharedModels.Board _board; // Solo per Shake()
+    private SharedModels.Board _distributionBoard;
     private static long _gameSerial = 0;
-
     private readonly object _syncObject = new();
     private readonly IHubContext<GameHub> _hubContext;
 
-    // Eventi
-    public event Func<Task>? RoundStart;
-    public event Func<Task>? RoundTerminate;
-    public event Func<Task>? ValidatedResults;
-    public event Func<Task>? NewMatchKeepReady;
-    public event Func<Task>? ScoreChange;
-    public event Func<Task>? BoardDiscarded;
+    // Eventi (rimosso nullable - conflitto con #nullable disable)
+    public event Func<Task> RoundStart;
+    public event Func<Task> RoundTerminate;
+    public event Func<Task> ValidatedResults;
+    public event Func<Task> NewMatchKeepReady;
+    public event Func<Task> ScoreChange;
+    public event Func<Task> BoardDiscarded;
 
     private const int BOARD_RANK = 5;
     private const int MIN_PLAYERS = 1;
@@ -64,7 +53,7 @@ public class RoomMaster
 
     private static DateTime _roundStartTimeUTC;
     private RoomMasterState _state = RoomMasterState.Ready;
-    private BigBoggler_Common.Lexicon _lexicon = new BigBoggler_Common.Lexicon("it-IT");
+    private Lexicon _lexicon = new("it-IT"); // ✅ Usa Shared!
     private bool _discardAllowed = false;
     public enum RoomMasterState
     {
@@ -84,7 +73,7 @@ public class RoomMaster
         _gameSerial = startingBoardSerial;
 
         // Crea il primo board usando BigBoggler_Common con Shake()
-        _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
+        _board = new SharedModels.Board(BOARD_RANK);
         _board.Shake();
         StoreDistributionBoard();
 
@@ -121,14 +110,14 @@ public class RoomMaster
     }
 
     public RoomMasterState State => _state;
-    public DtoModels.Board? Board => _distributionBoard;
+    public Board? Board => _distributionBoard;
     public int RoundDurationMS => GAME_ROUND_DURATION_MS;
     public int DeadTimeAmountMS => GAME_PRE_VALIDATION_INTERVAL_MS + GAME_SHOWTIME_PAUSE_MS + GAME_PRE_START_DELAY;
     public DateTime RoundStartTimeUTC => _roundStartTimeUTC;
     public bool DiscardAllowed => _discardAllowed;
-    public DtoModels.Players GetRoomPlayers(string clientID)
+    public Players GetRoomPlayers(string clientID)
     {
-        var playersList = new List<DtoModels.Player>();
+        var playersList = new List<Player>();
 
         foreach (var ply in _roomPlayers.Values)
         {
@@ -150,7 +139,7 @@ public class RoomMaster
                 displayName = "[" + displayName + "]";
             }
 
-            var newPlayer = new DtoModels.Player
+            var newPlayer = new Player
             {
                 ID = ply.ID,
                 NickName = displayName,
@@ -164,19 +153,19 @@ public class RoomMaster
 
         // Ordina: player locale in cima, poi gli altri
         var sortedList = playersList.OrderByDescending(p => p.IsLocal).ToList();
-        return new DtoModels.Players { Items = sortedList.ToArray() };
+        return new Players { Items = sortedList.ToArray() };
     }
 
     public bool AddRoundPlayer(string playerID, string name, int gameScore = 0, long rank = 0)
     {
-        var player = new DtoModels.Player
+        var player = new Player
         {
             ID = playerID,
             NickName = name,
             Score = gameScore,
             IsReady = false,
             WantsDiscard = false,
-            WordList = new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() }
+            WordList = new WordList { Items = Array.Empty<Word>() }
         };
 
         return _roomPlayers.TryAdd(playerID, player);
@@ -206,8 +195,8 @@ public class RoomMaster
             }
 
             // Genera nuova board (il seriale _gameSerial continua a incrementare, NON si resetta)
-            _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
-            _board.Shake();
+            _board = new SharedModels.Board(BOARD_RANK);
+            _board.Shake();      
             StoreDistributionBoard(); // Incrementa _gameSerial
 
             // Torna allo stato Ready
@@ -222,22 +211,22 @@ public class RoomMaster
         _roomPlayers.TryRemove(playerID, out _);
     }
 
-    public DtoModels.WordList? GetSolution()
+    public WordList? GetSolution()
     {
         try
         {
             var bigBogSolution = _board?.Solve(_lexicon);
             if (bigBogSolution == null || bigBogSolution.Count == 0)
             {
-                return new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() };
+                return new WordList { Items = Array.Empty<Word>() };
             }
 
-            return ConvertBigBogWordListToDto(bigBogSolution);
+            return bigBogSolution;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in GetSolution: {ex.Message}");
-            return new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() };
+            return new WordList { Items = Array.Empty<Word>() };
         }
     }
 
@@ -281,62 +270,40 @@ public class RoomMaster
 
 
     // Converte da BigBoggler.WordList a DTO WordList (per GetSolution)
-    private DtoModels.WordList ConvertBigBogWordListToDto(BigBoggler_Common.WordList bigBogWordList)
-    {
-        var dtoWords = new List<DtoModels.Word>();
 
-        foreach (var wordEntry in bigBogWordList.Values)
-        {
-            var dtoWord = new DtoModels.Word
-            {
-                DicePath = wordEntry.DicePath.Select(d => new DtoModels.Dice
-                {
-                    Index = d.Row * 5 + d.Column,
-                    Letter = d.SelectedString,
-                    Row = d.Row,
-                    Column = d.Column,
-                    Rotation = d.FaceRotation
-                }).ToList()
-            };
-            dtoWords.Add(dtoWord);
-        }
+    //// Converte da DTO WordList a BigBoggler.WordList (per validazione WordList giocatori)
+    //private BigBoggler_Common.WordList ConvertDtoWordListToBigBog(SharedModels.WordList dtoWordList)
+    //{
+    //    var bigBogWordList = new BigBoggler_Common.WordList();
 
-        return new DtoModels.WordList { Items = dtoWords.ToArray() };
-    }
+    //    if (dtoWordList?.Items == null || _board == null)
+    //        return bigBogWordList;
 
-    // Converte da DTO WordList a BigBoggler.WordList (per validazione WordList giocatori)
-    private BigBoggler_Common.WordList ConvertDtoWordListToBigBog(DtoModels.WordList dtoWordList)
-    {
-        var bigBogWordList = new BigBoggler_Common.WordList();
+    //    foreach (var dtoWord in dtoWordList.Items)
+    //    {
+    //        if (dtoWord?.DicePath == null || dtoWord.DicePath.Count == 0)
+    //            continue;
 
-        if (dtoWordList?.Items == null || _board == null)
-            return bigBogWordList;
+    //        var bigBogWord = new BigBoggler_Common.WordBase();
 
-        foreach (var dtoWord in dtoWordList.Items)
-        {
-            if (dtoWord?.DicePath == null || dtoWord.DicePath.Count == 0)
-                continue;
+    //        foreach (var dtoDice in dtoWord.DicePath)
+    //        {
+    //            // Recupera il dado vero dal board usando l'indice
+    //            var row = dtoDice.Index / 5;
+    //            var col = dtoDice.Index % 5;
+    //            var boardDice = _board.DiceArray[row, col];
+    //            bigBogWord.AppendDiceLast(boardDice);
+    //        }
 
-            var bigBogWord = new BigBoggler_Common.WordBase();
+    //        // Aggiunge alla WordList usando il testo come chiave
+    //        if (!string.IsNullOrEmpty(bigBogWord.Text))
+    //        {
+    //            bigBogWordList.Add(bigBogWord.Text, bigBogWord);
+    //        }
+    //    }
 
-            foreach (var dtoDice in dtoWord.DicePath)
-            {
-                // Recupera il dado vero dal board usando l'indice
-                var row = dtoDice.Index / 5;
-                var col = dtoDice.Index % 5;
-                var boardDice = _board.DiceArray[row, col];
-                bigBogWord.AppendDiceLast(boardDice);
-            }
-
-            // Aggiunge alla WordList usando il testo come chiave
-            if (!string.IsNullOrEmpty(bigBogWord.Text))
-            {
-                bigBogWordList.Add(bigBogWord.Text, bigBogWord);
-            }
-        }
-
-        return bigBogWordList;
-    }
+    //    return bigBogWordList;
+    //}
 
 
 //    WORDLIST CONVERSION TO DO old VB version.\\
@@ -361,7 +328,7 @@ public class RoomMaster
 
 
 
-    public void AddWordList(DtoModels.WordList wordList, string playerID)
+    public void AddWordList(SharedModels.WordList wordList, string playerID)
     {
         if (_roomPlayers.TryGetValue(playerID, out var player))
         {
@@ -444,7 +411,7 @@ public class RoomMaster
         _gameSerial++;
 
         // Converte il board BigBoggler in DTO per il client
-        var dtoBoard = new DtoModels.Board
+        var dtoBoard = new Board
         {
             LocaleID = _board.LocaleID,
             GameSerial = _gameSerial,
@@ -452,13 +419,13 @@ public class RoomMaster
         };
 
         // Converte i dadi - DiceArray è una PROPERTY indexer in BigBoggler
-        var dices = new List<DtoModels.Dice>();
+        var dices = new List<SharedModels.Dice>();
         for (int i = 0; i < 5; i++)
         {
             for (int j = 0; j < 5; j++)
             {
                 var bigBogDice = _board.DiceArray[i, j]; // Usa indexer []
-                var dice = new DtoModels.Dice
+                var dice = new SharedModels.Dice
                 {
                     Letter = bigBogDice.SelectedString,
                     Rotation = bigBogDice.FaceRotation,
@@ -488,7 +455,7 @@ public class RoomMaster
                     _state = RoomMasterState.SendingBoard;
 
                     // Crea nuovo board usando BigBoggler
-                    _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
+                    _board = new Board(BOARD_RANK);
                     _board.Shake();
                     StoreDistributionBoard();
 
@@ -623,7 +590,7 @@ public class RoomMaster
         }
     }
 
-    private string GetWordText(DtoModels.Word word)
+    private string GetWordText(SharedModels.Word word)
     {
         if (word.DicePath == null || word.DicePath.Count == 0)
             return string.Empty;
@@ -781,11 +748,11 @@ public class RoomMaster
                 {
                     player.WantsDiscard = false;
                     player.IsReady = true; // Rimangono pronti
-                    player.WordList = new DtoModels.WordList { Items = Array.Empty<DtoModels.Word>() }; // Reset wordlist
+                    player.WordList = new SharedModels.WordList { Items = Array.Empty<SharedModels.Word>() }; // Reset wordlist
                 }
 
                 // Genera nuova board (seriale incrementa)
-                _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
+                _board = new Board(BOARD_RANK);
                 _board.Shake();
                 StoreDistributionBoard();
 

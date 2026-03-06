@@ -13,7 +13,11 @@ namespace BigBoggler.Models
         [DataMember]
         public bool Duplicated { get; set; }
 
-        public LinkedList<Dice> DicePath => _dicePath;
+        public LinkedList<Dice> DicePath 
+        { 
+            get => _dicePath;
+            set => _dicePath = value ?? new LinkedList<Dice>();
+        }
 
         public string Text => string.Join("", _dicePath.Select(d => d.Letter));
 

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
-using WebBoggler.SignalRServer.Models;
+using BigBoggler.Models;
 using WebBoggler.SignalRServer.Services;
 
 namespace WebBoggler.SignalRServer;
@@ -139,7 +139,7 @@ public class GameHub : Hub
         return await Task.FromResult(board);
     }
 
-    public async Task<GameInfo> Observe()
+    public async Task<WebBoggler.SignalRServer.Models.GameInfo> Observe()
     {
         var roundElapsedTimeMS = 0;
         if (_roomMaster.State == RoomMaster.RoomMasterState.RunningRound)
@@ -147,7 +147,7 @@ public class GameHub : Hub
             roundElapsedTimeMS = (int)(DateTime.UtcNow - _roomMaster.RoundStartTimeUTC).TotalMilliseconds;
         }
 
-        var gameInfo = new GameInfo
+        var gameInfo = new WebBoggler.SignalRServer.Models.GameInfo
         {
             ServerTimeUTC = DateTime.UtcNow.ToString("o"),
             RoomState = _roomMaster.State.ToString(),
