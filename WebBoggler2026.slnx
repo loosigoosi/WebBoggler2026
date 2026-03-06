@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="../../../Libraries/BigBoggler/BigBoggler.Shared/BigBoggler.Shared.csproj" Id="4b92499e-13f6-4515-8970-1a6f547ac960" />
+  <Project Path="BigBoggler.Shared/BigBoggler.Shared.csproj" />
   <Project Path="WebBoggler/WebBoggler.Browser/WebBoggler.Browser.csproj" />
   <Project Path="WebBoggler/WebBoggler.MauiHybrid/WebBoggler.MauiHybrid.csproj">
     <Deploy Solution="Debug|*" />
