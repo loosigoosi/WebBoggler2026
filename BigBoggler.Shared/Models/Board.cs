@@ -23,6 +23,14 @@ namespace BigBoggler.Models
         [DataMember]
         public int WordCount { get; set; }
 
+        // NUOVO: BoardID per compatibilità con BigBoggler_Common
+        [DataMember]
+        public long BoardID 
+        { 
+            get => GameSerial; 
+            set => GameSerial = value; 
+        }
+
         // Proprietà per serializzazione SignalR
         [DataMember]
         public Dice[] DicesVector
@@ -51,7 +59,7 @@ namespace BigBoggler.Models
         }
 
         // Proprietà non serializzate
-        public int GridRank => _gridRank;
+        public int GridRank => _gridRank;  // AGGIUNTO: per compatibilità
         public Dice[,] DiceArray => _diceArray;
 
         public Board() : this(5)

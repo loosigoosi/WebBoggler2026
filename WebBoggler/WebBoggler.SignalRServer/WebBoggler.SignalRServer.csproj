@@ -11,10 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- AGGIUNGI: Reference al progetto shared -->
+    <!-- NUOVO: Reference al progetto shared unificato -->
     <ProjectReference Include="..\..\BigBoggler.Shared\BigBoggler.Shared.csproj" />
     
-    <!-- MANTIENI: BigBoggler_Common per Board.Shake() e Lexicon -->
+    <!-- MANTIENI TEMPORANEO: BigBoggler_Common solo per Board.Shake() e DiceBag.xml -->
     <Reference Include="BigBoggler">
       <HintPath>..\WebBogglerService\libs\BigBoggler.dll</HintPath>
     </Reference>

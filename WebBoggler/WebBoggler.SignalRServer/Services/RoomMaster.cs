@@ -1,4 +1,7 @@
-using BigBoggler_Common; // Per Board con Shake()
+using BigBoggler_Common; // TEMPORANEO: Solo per Board.Shake() e Lexicon
+using BigBoggler.Models;  // NUOVO: Modelli unificati
+using BigBoggler.Timing.Server; // NUOVO: ServerHourglass
+using BigBoggler.Lexicon; // NUOVO: Lexicon service
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
@@ -11,19 +14,27 @@ using static System.Net.Mime.MediaTypeNames;
 using static System.Net.WebRequestMethods;
 using DtoModels = WebBoggler.SignalRServer.Models; // Alias per i DTO
 using Timer = System.Timers.Timer;
+#nullable disable
 
 namespace WebBoggler.SignalRServer.Services;
 
 public class RoomMaster
 {
-    private readonly ConcurrentDictionary<string, DtoModels.Player> _roomPlayers = new(); // Semplice: uso DTO
-    private BigBoggler_Common.Board? _board; // Il VERO board con Shake()
-    private DtoModels.Board? _distributionBoard; // DTO per il client
+    // Usa BigBoggler.Models invece dei DTO locali
+    private readonly ConcurrentDictionary<string, DtoModels.Player> _roomPlayers = new();
+    
+    // TEMPORANEO: usa ancora BigBoggler_Common.Board per Shake()
+    private BigBoggler_Common.Board? _board;
+    
+    // Per distribuzione: convertiamo in BigBoggler.Models.Board
+    private DtoModels.Board? _distributionBoard;
+    
     private static long _gameSerial = 0;
 
     private readonly object _syncObject = new();
     private readonly IHubContext<GameHub> _hubContext;
 
+    // Eventi
     public event Func<Task>? RoundStart;
     public event Func<Task>? RoundTerminate;
     public event Func<Task>? ValidatedResults;
@@ -32,20 +43,19 @@ public class RoomMaster
     public event Func<Task>? BoardDiscarded;
 
     private const int BOARD_RANK = 5;
-    private const int MIN_PLAYERS = 1; // Almeno 1 giocatore per iniziare
-
+    private const int MIN_PLAYERS = 1;
     private const int GAME_PRE_START_DELAY = 3000;
-#if DEBUG
+    #if DEBUG
     private const int GAME_ROUND_DURATION_MS = 60000;
-#else
+    #else
     private const int GAME_ROUND_DURATION_MS = 180000;
-#endif
+    #endif
     private const int GAME_PRE_VALIDATION_INTERVAL_MS = 3500;
     private const int GAME_SHOWTIME_PAUSE_MS = 60000;
     private const int CYCLE_INTERVAL_MS = 250;
-    private const int DISCARD_ALLOWED_TIME_MS = 15000; // Primi 15 secondi per proporre scarto
+    private const int DISCARD_ALLOWED_TIME_MS = 15000;
 
-    private readonly Timer _hourglassTimer;
+    private readonly ServerHourglass _roundTimer;
     private readonly Timer _preStartDelayTimer;
     private readonly Timer _preValidationTimer;
     private readonly Timer _showTimeTimer;
@@ -73,14 +83,24 @@ public class RoomMaster
         _hubContext = hubContext;
         _gameSerial = startingBoardSerial;
 
-        // Crea il primo board usando BigBoggler con Shake()
+        // Crea il primo board usando BigBoggler_Common con Shake()
         _board = new BigBoggler_Common.Board(BOARD_RANK, "it-IT");
         _board.Shake();
         StoreDistributionBoard();
 
-        _hourglassTimer = new Timer(GAME_ROUND_DURATION_MS) { AutoReset = false };
-        _hourglassTimer.Elapsed += HourglassTimer_Elapsed;
+        // NUOVO: ServerHourglass al posto di _hourglassTimer
+        _roundTimer = new ServerHourglass
+        {
+            Duration = TimeSpan.FromMilliseconds(GAME_ROUND_DURATION_MS)
+        };
+        _roundTimer.OnExpiredAsync(async () => 
+        {
+            Console.WriteLine("[RoomMaster] Round timer expired - Calling EndRound()");
+            EndRound();
+            await Task.CompletedTask;
+        });
 
+        // Altri timer rimangono Timer standard
         _preStartDelayTimer = new Timer(GAME_PRE_START_DELAY) { AutoReset = false };
         _preStartDelayTimer.Elapsed += PreStartDelayTimer_Elapsed;
 
@@ -112,7 +132,7 @@ public class RoomMaster
 
         foreach (var ply in _roomPlayers.Values)
         {
-            string displayName = ply.NickName;
+            string displayName = ply.NickName ?? "";
 
             // Aggiungi Spunta se IsReady
             if (ply.IsReady)
@@ -146,17 +166,6 @@ public class RoomMaster
         var sortedList = playersList.OrderByDescending(p => p.IsLocal).ToList();
         return new DtoModels.Players { Items = sortedList.ToArray() };
     }
-    public BigBoggler_Common.Lexicon RMLexicon
-    {
-        get { return _lexicon; }
-        set { _lexicon = value; }
-    }
-
-    public BigBoggler_Common.Board DistributionBoard
-    {
-        get { try {return _board; } catch { return null; } }
-        set { _board = value; }
-    }
 
     public bool AddRoundPlayer(string playerID, string name, int gameScore = 0, long rank = 0)
     {
@@ -181,7 +190,7 @@ public class RoomMaster
             Console.WriteLine("[RoomMaster.OnPlayerJoined] Second player joined - Resetting game state");
 
             // Ferma tutti i timer
-            _hourglassTimer.Stop();
+            _roundTimer.Reset();
             _preStartDelayTimer.Stop();
             _preValidationTimer.Stop();
             _showTimeTimer.Stop();
@@ -367,7 +376,7 @@ public class RoomMaster
         if (_roomPlayers.TryGetValue(clientID, out var player))
         {
             player.IsReady = ready;
-            Console.WriteLine($"[RoomMaster.SetPlayerReadyState] Player {player.NickName} set to IsReady={ready}");
+            Console.WriteLine($"[RoomMaster.SetPlayerReadyState] Player {player.NickName ?? "Unknown"} set to IsReady={ready}");
         }
         else
         {
@@ -417,7 +426,7 @@ public class RoomMaster
 
             foreach (var p in _roomPlayers.Values)
             {
-                Console.WriteLine($"  - {p.NickName}: IsReady={p.IsReady}");
+                Console.WriteLine($"  - {p.NickName ?? "Unknown"}: IsReady={p.IsReady}");
             }
 
             if (everyBodyIsReady && _roomPlayers.Count > 0)
@@ -490,15 +499,15 @@ public class RoomMaster
                             await NewMatchKeepReady.Invoke();
                     });
 
-                    _preStartDelayTimer.Start();
+                    _roundTimer.Run();
                 }
             }
         }
         else
         {
-            if (_hourglassTimer.Enabled && _roomPlayers.Count < MIN_PLAYERS)
+            if (_roundTimer.IsRunning && _roomPlayers.Count < MIN_PLAYERS)
             {
-                _hourglassTimer.Stop();
+                _roundTimer.Reset();
                 EndRound();
             }
         }
@@ -577,11 +586,11 @@ public class RoomMaster
             {
                 if (player1.WordList?.Items == null)
                 {
-                    Console.WriteLine($"[MarkDuplicatedWords] Player {player1.NickName} has no words");
+                    Console.WriteLine($"[MarkDuplicatedWords] Player {player1.NickName ?? "Unknown"} has no words");
                     continue;
                 }
 
-                Console.WriteLine($"[MarkDuplicatedWords] Processing player {player1.NickName} with {player1.WordList.Items.Length} words");
+                Console.WriteLine($"[MarkDuplicatedWords] Processing player {player1.NickName ?? "Unknown"} with {player1.WordList.Items.Length} words");
 
                 foreach (var word1 in player1.WordList.Items)
                 {
@@ -622,6 +631,14 @@ public class RoomMaster
         return string.Join("", word.DicePath.Where(d => d != null).Select(d => d.Letter ?? ""));
     }
 
+    private string GetWordText(BigBoggler.Models.WordBase word)
+    {
+        if (word == null)
+            return string.Empty;
+
+        return word.Text;
+    }
+
     private async Task UpdateScores()
     {
         // Copilot comment: Implementazione semplificata - punteggio base per lunghezza
@@ -634,7 +651,7 @@ public class RoomMaster
             {
                 if (player.WordList?.Items == null)
                 {
-                    Console.WriteLine($"[UpdateScores] Player {player.NickName} has no words");
+                    Console.WriteLine($"[UpdateScores] Player {player.NickName ?? "Unknown"} has no words");
                     continue;
                 }
 
@@ -645,7 +662,7 @@ public class RoomMaster
                     .ToList();
                 player.WordList.Items = wordsList.ToArray();
 
-                Console.WriteLine($"[UpdateScores] Player {player.NickName} after removing duplicates: {wordsList.Count} words");
+                Console.WriteLine($"[UpdateScores] Player {player.NickName ?? "Unknown"} after removing duplicates: {wordsList.Count} words");
 
                 int score = 0;
                 foreach (var word in player.WordList.Items)
@@ -666,7 +683,7 @@ public class RoomMaster
                 }
 
                 player.Score += score;
-                Console.WriteLine($"[UpdateScores] Player {player.NickName} scored {score} points, total: {player.Score}");
+                Console.WriteLine($"[UpdateScores] Player {player.NickName ?? "Unknown"} scored {score} points, total: {player.Score}");
             }
 
             Console.WriteLine("[UpdateScores] Invoking ScoreChange event...");
@@ -719,13 +736,7 @@ public class RoomMaster
         _discardAllowed = true;
         _discardAllowedTimer.Start();
 
-        _hourglassTimer.Start();
-    }
-
-    private void HourglassTimer_Elapsed(object? sender, ElapsedEventArgs e)
-    {
-        Console.WriteLine("[RoomMaster] HourglassTimer_Elapsed - Calling EndRound()");
-        EndRound();
+        _roundTimer.Run();
     }
 
     private async void PreValidationTimer_Elapsed(object? sender, ElapsedEventArgs e)
@@ -761,7 +772,7 @@ public class RoomMaster
                 Console.WriteLine("[RoomMaster.CheckDiscard] All players want to discard - regenerating board");
 
                 // Ferma i timer del round corrente
-                _hourglassTimer.Stop();
+                _roundTimer.Reset();
                 _discardAllowedTimer.Stop();
                 _discardAllowed = false;
 

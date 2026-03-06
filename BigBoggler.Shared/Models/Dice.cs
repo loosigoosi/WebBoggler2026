@@ -23,7 +23,18 @@ namespace BigBoggler.Models
 
         // Proprietà calcolate (non serializzate)
         public string SelectedString => _faces[SelectedFace];
-        public int Index => Row * 5 + Column;
+        
+        // AGGIORNATO: Index con setter
+        public int Index 
+        { 
+            get => Row * 5 + Column;
+            set
+            {
+                // Decompone l'indice in Row e Column (assume 5x5)
+                Row = value / 5;
+                Column = value % 5;
+            }
+        }
         
         // Per serializzazione SignalR
         [DataMember]
