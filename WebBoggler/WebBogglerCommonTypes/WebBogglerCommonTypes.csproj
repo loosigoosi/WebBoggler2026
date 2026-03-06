@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DefineSilverlight>true</DefineSilverlight>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Board.cs" />
+    <Compile Include="Dice.cs" />
+    <Compile Include="Dices.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Players.cs" />
+    <Compile Include="WordBase.cs" />
+    <Compile Include="WordList.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenSilver" Version="3.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="libs\**" />
+  </ItemGroup>
+
+</Project>

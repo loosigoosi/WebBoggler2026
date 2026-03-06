@@ -1,0 +1,58 @@
+Migrazione completa da WCF a SignalR con RoomMaster funzionante
+
+## Migrazione Server
+- Creato nuovo progetto WebBoggler.SignalRServer (ASP.NET Core 8.0)
+- Implementato GameHub con tutti i metodi client (Register, Join, Leave, GetBoard, Observe, ecc.)
+- Implementato RoomMaster completo con game loop timer-based:
+  * 5 timer gestiti: hourglass (180s), preStart (3s), preValidation (3.5s), showTime (60s), checkPlayers (250ms)
+  * Gestione stati: WaitingPlayers -> GET_BOARD -> START_ROUND -> END_ROUND -> SHOW_TIME -> ciclo
+  * MIN_PLAYERS=0 per testing single-player
+  * Broadcast messaggi via IHubContext<GameHub>
+- Configurato CORS per accettare connessioni da localhost:55591
+- RoomMaster registrato come Singleton in Program.cs
+
+## Modelli Dati
+- Creati modelli server in WebBoggler.SignalRServer/Models:
+  * Player: 13 proprietà (ID, NickName, Score, IsReady, TotalWordsCount, ecc.)
+  * Players: classe con Items array (non più List inheritance)
+  * WordList: classe con Items array per compatibilità WCF proxy
+  * Board: metodo Shake() per generazione dadi casuali
+  * Word: proprietà Duplicated, DicePath come List<Dice>
+  * GameInfo: aggiunto ServerTimeUTC
+- Allineati modelli client:
+  * Aggiunte proprietà IsReady e TotalWordsCount a WebBogglerCommonTypes.Player
+  * Aggiunte stesse proprietà a WebBoggler.Player (partial class)
+
+## Client SignalR
+- Creato ServiceConnector.cs con wrapper SignalRGameClient
+- HubConnection configurata per localhost:5170/gamehub
+- Implementati eventi WCF-like: OnOpen, OnMessage, OnClose, OnError
+- Conversione messaggi server in eventi stringa per switch/case esistente
+
+## Fix e Correzioni
+- Fix ServiceTypesIntegrator.cs: conversione implicita Players ora copia TUTTI i campi
+  * Risolto bug mancanza NickName e Score nella UI
+  * Aggiunti campi: IsReady, TotalWordsCount, Rank, Record, WinPercent
+- Fix Desk.cs:
+  * Aggiunto null check in _OneSecondTicker_Tick per _gameInfo
+  * Corretti await mancanti in ObserveGame() e _WebSocket_OnMessage
+- Rimosso WebSocketShim.cs (sostituito da SignalR)
+
+## Testing e Validazione
+- Build completa riuscita senza errori
+- Server avvia correttamente su http://localhost:5170
+- Client si connette e riceve ID registrazione
+- Deserializzazione Players/Board/GameInfo funzionante
+- Timer CheckPlayers cicla ogni 250ms come previsto
+
+## Prossimi Passi
+- Test flusso completo: Register -> Join -> GET_BOARD -> START_ROUND -> END_ROUND -> SHOW_TIME
+- Implementare validazione parole con dizionario (ora stub che ritorna true)
+- Implementare generazione board con dadi Boggle reali (ora lettere casuali)
+- Implementare calcolo soluzione (ora ritorna lista vuota)
+- Testing multiplayer con più client connessi
+
+## Note Storiche
+Progetto originale: Windows Phone 8 + Photon Engine (2014-2015)
+Migrazione: WP8 -> WUP -> OpenSilver + SignalR (2025)
+Dopo 10 anni, il gioco torna online!

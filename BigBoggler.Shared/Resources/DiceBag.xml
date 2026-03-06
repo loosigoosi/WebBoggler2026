@@ -1,0 +1,406 @@
+<DiceBag count="25">
+  <language localeName="Italiano" localeID="it-IT">
+    <dice ID="0">
+      <side ID="0">A</side>
+      <side ID="1">Z</side>
+      <side ID="2">F</side>
+      <side ID="3">S</side>
+      <side ID="4">Qu</side>
+      <side ID="5">B</side>
+    </dice>
+    <dice ID="1">
+      <side ID="0">G</side>
+      <side ID="1">C</side>
+      <side ID="2">S</side>
+      <side ID="3">V</side>
+      <side ID="4">P</side>
+      <side ID="5">A</side>
+    </dice>
+    <dice ID="2">
+      <side ID="0">H</side>
+      <side ID="1">I</side>
+      <side ID="2">S</side>
+      <side ID="3">E</side>
+      <side ID="4">R</side>
+      <side ID="5">N</side>
+    </dice>
+    <dice ID="3">
+      <side ID="0">A</side>
+      <side ID="1">I</side>
+      <side ID="2">O</side>
+      <side ID="3">B</side>
+      <side ID="4">M</side>
+      <side ID="5">C</side>
+    </dice>
+    <dice ID="4">
+      <side ID="0">T</side>
+      <side ID="1">I</side>
+      <side ID="2">V</side>
+      <side ID="3">E</side>
+      <side ID="4">N</side>
+      <side ID="5">G</side>
+    </dice>
+    <dice ID="5">
+      <side ID="0">M</side>
+      <side ID="1">O</side>
+      <side ID="2">V</side>
+      <side ID="3">D</side>
+      <side ID="4">I</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="6">
+      <side ID="0">V</side>
+      <side ID="1">N</side>
+      <side ID="2">D</side>
+      <side ID="3">Z</side>
+      <side ID="4">A</side>
+      <side ID="5">E</side>
+    </dice>
+    <dice ID="7">
+      <side ID="0">O</side>
+      <side ID="1">A</side>
+      <side ID="2">A</side>
+      <side ID="3">I</side>
+      <side ID="4">E</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="8">
+      <side ID="0">F</side>
+      <side ID="1">R</side>
+      <side ID="2">I</side>
+      <side ID="3">P</side>
+      <side ID="4">A</side>
+      <side ID="5">G</side>
+    </dice>
+    <dice ID="9">
+      <side ID="0">M</side>
+      <side ID="1">L</side>
+      <side ID="2">R</side>
+      <side ID="3">C</side>
+      <side ID="4">O</side>
+      <side ID="5">I</side>
+    </dice>
+    <dice ID="10">
+      <side ID="0">O</side>
+      <side ID="1">N</side>
+      <side ID="2">F</side>
+      <side ID="3">E</side>
+      <side ID="4">B</side>
+      <side ID="5">L</side>
+    </dice>
+    <dice ID="11">
+      <side ID="0">L</side>
+      <side ID="1">O</side>
+      <side ID="2">C</side>
+      <side ID="3">I</side>
+      <side ID="4">D</side>
+      <side ID="5">M</side>
+    </dice>
+    <dice ID="12">
+      <side ID="0">T</side>
+      <side ID="1">B</side>
+      <side ID="2">R</side>
+      <side ID="3">L</side>
+      <side ID="4">I</side>
+      <side ID="5">A</side>
+    </dice>
+    <dice ID="13">
+      <side ID="0">C</side>
+      <side ID="1">F</side>
+      <side ID="2">A</side>
+      <side ID="3">R</side>
+      <side ID="4">O</side>
+      <side ID="5">I</side>
+    </dice>
+    <dice ID="14">
+      <side ID="0">N</side>
+      <side ID="1">U</side>
+      <side ID="2">E</side>
+      <side ID="3">O</side>
+      <side ID="4">C</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="15">
+      <side ID="0">L</side>
+      <side ID="1">E</side>
+      <side ID="2">P</side>
+      <side ID="3">U</side>
+      <side ID="4">S</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="16">
+      <side ID="0">N</side>
+      <side ID="1">O</side>
+      <side ID="2">D</side>
+      <side ID="3">E</side>
+      <side ID="4">S</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="17">
+      <side ID="0">A</side>
+      <side ID="1">I</side>
+      <side ID="2">O</side>
+      <side ID="3">S</side>
+      <side ID="4">M</side>
+      <side ID="5">R</side>
+    </dice>
+    <dice ID="18">
+      <side ID="0">T</side>
+      <side ID="1">G</side>
+      <side ID="2">C</side>
+      <side ID="3">A</side>
+      <side ID="4">P</side>
+      <side ID="5">I</side>
+    </dice>
+    <dice ID="19">
+      <side ID="0">L</side>
+      <side ID="1">A</side>
+      <side ID="2">R</side>
+      <side ID="3">E</side>
+      <side ID="4">S</side>
+      <side ID="5">C</side>
+    </dice>
+    <dice ID="20">
+      <side ID="0">A</side>
+      <side ID="1">B</side>
+      <side ID="2">O</side>
+      <side ID="3">O</side>
+      <side ID="4">Qu</side>
+      <side ID="5">M</side>
+    </dice>
+    <dice ID="21">
+      <side ID="0">G</side>
+      <side ID="1">U</side>
+      <side ID="2">E</side>
+      <side ID="3">O</side>
+      <side ID="4">N</side>
+      <side ID="5">L</side>
+    </dice>
+    <dice ID="22">
+      <side ID="0">C</side>
+      <side ID="1">D</side>
+      <side ID="2">P</side>
+      <side ID="3">M</side>
+      <side ID="4">A</side>
+      <side ID="5">E</side>
+    </dice>
+    <dice ID="23">
+      <side ID="0">R</side>
+      <side ID="1">O</side>
+      <side ID="2">E</side>
+      <side ID="3">L</side>
+      <side ID="4">U</side>
+      <side ID="5">I</side>
+    </dice>
+    <dice ID="24">
+      <side ID="0">H</side>
+      <side ID="1">I</side>
+      <side ID="2">F</side>
+      <side ID="3">E</side>
+      <side ID="4">I</side>
+      <side ID="5">E</side>
+    </dice>
+  </language>
+  <language localeName="English" localeID="en-EN">
+    <dice ID="0">
+      <side ID="0">A</side>
+      <side ID="1">A</side>
+      <side ID="2">A</side>
+      <side ID="3">F</side>
+      <side ID="4">R</side>
+      <side ID="5">S</side>
+    </dice>
+    <dice ID="1">
+      <side ID="0">A</side>
+      <side ID="1">A</side>
+      <side ID="2">E</side>
+      <side ID="3">E</side>
+      <side ID="4">E</side>
+      <side ID="5">E</side>
+    </dice>
+    <dice ID="2">
+      <side ID="0">A</side>
+      <side ID="1">A</side>
+      <side ID="2">F</side>
+      <side ID="3">I</side>
+      <side ID="4">R</side>
+      <side ID="5">S</side>
+    </dice>
+    <dice ID="3">
+      <side ID="0">A</side>
+      <side ID="1">D</side>
+      <side ID="2">E</side>
+      <side ID="3">N</side>
+      <side ID="4">N</side>
+      <side ID="5">N</side>
+    </dice>
+    <dice ID="4">
+      <side ID="0">A</side>
+      <side ID="1">E</side>
+      <side ID="2">E</side>
+      <side ID="3">E</side>
+      <side ID="4">E</side>
+      <side ID="5">M</side>
+    </dice>
+    <dice ID="5">
+      <side ID="0">A</side>
+      <side ID="1">E</side>
+      <side ID="2">E</side>
+      <side ID="3">G</side>
+      <side ID="4">M</side>
+      <side ID="5">U</side>
+    </dice>
+    <dice ID="6">
+      <side ID="0">A</side>
+      <side ID="1">E</side>
+      <side ID="2">G</side>
+      <side ID="3">M</side>
+      <side ID="4">N</side>
+      <side ID="5">N</side>
+    </dice>
+    <dice ID="7">
+      <side ID="0">A</side>
+      <side ID="1">F</side>
+      <side ID="2">I</side>
+      <side ID="3">R</side>
+      <side ID="4">S</side>
+      <side ID="5">Y</side>
+    </dice>
+    <dice ID="8">
+      <side ID="0">B</side>
+      <side ID="1">J</side>
+      <side ID="2">K</side>
+      <side ID="3">Q</side>
+      <side ID="4">X</side>
+      <side ID="5">Z</side>
+    </dice>
+    <dice ID="9">
+      <side ID="0">C</side>
+      <side ID="1">C</side>
+      <side ID="2">E</side>
+      <side ID="3">N</side>
+      <side ID="4">S</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="10">
+      <side ID="0">C</side>
+      <side ID="1">E</side>
+      <side ID="2">I</side>
+      <side ID="3">I</side>
+      <side ID="4">L</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="11">
+      <side ID="0">C</side>
+      <side ID="1">E</side>
+      <side ID="2">I</side>
+      <side ID="3">L</side>
+      <side ID="4">P</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="12">
+      <side ID="0">C</side>
+      <side ID="1">E</side>
+      <side ID="2">I</side>
+      <side ID="3">P</side>
+      <side ID="4">S</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="13">
+      <side ID="0">D</side>
+      <side ID="1">D</side>
+      <side ID="2">H</side>
+      <side ID="3">N</side>
+      <side ID="4">O</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="14">
+      <side ID="0">D</side>
+      <side ID="1">H</side>
+      <side ID="2">H</side>
+      <side ID="3">L</side>
+      <side ID="4">O</side>
+      <side ID="5">R</side>
+    </dice>
+    <dice ID="15">
+      <side ID="0">D</side>
+      <side ID="1">H</side>
+      <side ID="2">L</side>
+      <side ID="3">N</side>
+      <side ID="4">O</side>
+      <side ID="5">R</side>
+    </dice>
+    <dice ID="16">
+      <side ID="0">D</side>
+      <side ID="1">H</side>
+      <side ID="2">L</side>
+      <side ID="3">N</side>
+      <side ID="4">O</side>
+      <side ID="5">R</side>
+    </dice>
+    <dice ID="17">
+      <side ID="0">E</side>
+      <side ID="1">I</side>
+      <side ID="2">I</side>
+      <side ID="3">I</side>
+      <side ID="4">T</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="18">
+      <side ID="0">E</side>
+      <side ID="1">M</side>
+      <side ID="2">O</side>
+      <side ID="3">T</side>
+      <side ID="4">T</side>
+      <side ID="5">T</side>
+    </dice>
+    <dice ID="19">
+      <side ID="0">E</side>
+      <side ID="1">N</side>
+      <side ID="2">S</side>
+      <side ID="3">S</side>
+      <side ID="4">S</side>
+      <side ID="5">U</side>
+    </dice>
+    <dice ID="20">
+      <side ID="0">F</side>
+      <side ID="1">I</side>
+      <side ID="2">P</side>
+      <side ID="3">R</side>
+      <side ID="4">S</side>
+      <side ID="5">Y</side>
+    </dice>
+    <dice ID="21">
+      <side ID="0">G</side>
+      <side ID="1">O</side>
+      <side ID="2">R</side>
+      <side ID="3">R</side>
+      <side ID="4">V</side>
+      <side ID="5">W</side>
+    </dice>
+    <dice ID="22">
+      <side ID="0">I</side>
+      <side ID="1">P</side>
+      <side ID="2">R</side>
+      <side ID="3">R</side>
+      <side ID="4">R</side>
+      <side ID="5">Y</side>
+    </dice>
+    <dice ID="23">
+      <side ID="0">N</side>
+      <side ID="1">O</side>
+      <side ID="2">O</side>
+      <side ID="3">T</side>
+      <side ID="4">U</side>
+      <side ID="5">W</side>
+    </dice>
+    <dice ID="24">
+      <side ID="0">O</side>
+      <side ID="1">O</side>
+      <side ID="2">O</side>
+      <side ID="3">T</side>
+      <side ID="4">T</side>
+      <side ID="5">U</side>
+    </dice>
+  </language>
+</DiceBag>

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>BigBoggler.Shared</AssemblyName>
+    <RootNamespace>BigBoggler</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Enums\GlobalEnums.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include i file dati come EmbeddedResource -->
+    <EmbeddedResource Include="Resources\DiceBag.xml" />
+    <EmbeddedResource Include="Resources\lexicon_it-IT.txt" />
+    <EmbeddedResource Include="Resources\RoomNames.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Necessario per [DataContract] se deciderai di riusarli in futuro, 
+         ma opzionale per SignalR -->
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Enums\GlobalEnums.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,57 @@
+{
+  "ExtendedData": {
+    "inputs": [
+      "http://localhost:5733/ServiceWebBoggler.svc"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "enableDataBinding": true,
+    "namespaceMappings": [
+      "*, WebBogglerServer"
+    ],
+    "references": [
+      "Microsoft.Bcl.AsyncInterfaces, {Microsoft.Bcl.AsyncInterfaces, 5.0.0}",
+      "Microsoft.Extensions.ObjectPool, {Microsoft.Extensions.ObjectPool, 8.0.10}",
+      "Microsoft.IdentityModel.Logging, {Microsoft.IdentityModel.Logging, 6.8.0}",
+      "Microsoft.IdentityModel.Protocols.WsTrust, {Microsoft.IdentityModel.Protocols.WsTrust, 6.8.0}",
+      "Microsoft.IdentityModel.Tokens, {Microsoft.IdentityModel.Tokens, 6.8.0}",
+      "Microsoft.IdentityModel.Tokens.Saml, {Microsoft.IdentityModel.Tokens.Saml, 6.8.0}",
+      "Microsoft.IdentityModel.Xml, {Microsoft.IdentityModel.Xml, 6.8.0}",
+      "Microsoft.JSInterop, {Microsoft.JSInterop, 3.1.28}",
+      "OpenSilver, {OpenSilver, 3.3.3}",
+      "OpenSilver.Browser, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Data, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Data.DataForm.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Data.Input, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Data.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.DataVisualization.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Input, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Input.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Layout.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Navigation, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Theming.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Controls.Toolkit, {OpenSilver, 3.3.3}",
+      "OpenSilver.Data, {OpenSilver, 3.3.3}",
+      "OpenSilver.Expression.Effects, {OpenSilver, 3.3.3}",
+      "OpenSilver.Expression.Interactions, {OpenSilver, 3.3.3}",
+      "OpenSilver.Interactivity, {OpenSilver, 3.3.3}",
+      "OpenSilver.Themes.Modern, {OpenSilver.Themes.Modern, 3.3.0}",
+      "System.ComponentModel.Annotations, {System.ComponentModel.Annotations, 5.0.0}",
+      "System.ComponentModel.Composition, {System.ComponentModel.Composition, 6.0.0}",
+      "System.ComponentModel.Composition.Initialization, {OpenSilver, 3.3.3}",
+      "System.Security.Cryptography.Pkcs, {System.Security.Cryptography.Pkcs, 8.0.1}",
+      "System.Security.Cryptography.Xml, {System.Security.Cryptography.Xml, 8.0.2}",
+      "System.ServiceModel.Duplex, {System.ServiceModel.Duplex, 4.10.3}",
+      "System.ServiceModel.Federation, {System.ServiceModel.Federation, 4.10.3}",
+      "System.ServiceModel.Http, {System.ServiceModel.Http, 4.10.3}",
+      "System.ServiceModel.NetTcp, {System.ServiceModel.NetTcp, 4.10.3}",
+      "System.ServiceModel.Primitives, {System.ServiceModel.Primitives, 8.1.0}",
+      "System.ServiceModel.Security, {System.ServiceModel.Security, 4.10.3}"
+    ],
+    "targetFramework": "net10.0",
+    "typeReuseMode": "All"
+  }
+}

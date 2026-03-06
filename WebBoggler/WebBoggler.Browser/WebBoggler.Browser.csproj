@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OpenSilverType>7</OpenSilverType>
+    <PublishTrimmed>true</PublishTrimmed>
+    <WasmEnableSIMD>false</WasmEnableSIMD>
+    <!-- Uncomment to enable AOT compilation when publishing -->
+    <!--<RunAOTCompilation>true</RunAOTCompilation>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="favicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="OpenSilver.WebAssembly" Version="3.3.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DisableImplicitNamespaceImports>True</DisableImplicitNamespaceImports>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebBoggler\WebBoggler.csproj" />
+  </ItemGroup>
+
+</Project>

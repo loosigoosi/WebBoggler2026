@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="../../../Libraries/BigBoggler/BigBoggler.Shared/BigBoggler.Shared.csproj" Id="4b92499e-13f6-4515-8970-1a6f547ac960" />
+  <Project Path="WebBoggler/WebBoggler.Browser/WebBoggler.Browser.csproj" />
+  <Project Path="WebBoggler/WebBoggler.MauiHybrid/WebBoggler.MauiHybrid.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="WebBoggler/WebBoggler.Photino/WebBoggler.Photino.csproj" />
+  <Project Path="WebBoggler/WebBoggler.SignalRServer/WebBoggler.SignalRServer.csproj" />
+  <Project Path="WebBoggler/WebBoggler.Simulator/WebBoggler.Simulator.csproj" />
+  <Project Path="WebBoggler/WebBoggler/WebBoggler.csproj" />
+  <Project Path="WebBoggler/WebBogglerCommonTypes/WebBogglerCommonTypes.csproj" />
+  <Project Path="WebBoggler/WebBogglerService/WebBogglerService.vbproj" Id="66e0c125-8784-4136-9e01-7d45f193934f" />
+</Solution>
